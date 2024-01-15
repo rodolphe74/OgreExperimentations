@@ -1,0 +1,24 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-I/usr/include/bullet",
+      "-isystem",
+      "/usr/local/include/OGRE/Bites",
+      "-isystem",
+      "/usr/local/include/OGRE",
+      "-isystem",
+      "/usr/local/include/OGRE/Overlay",
+      "-isystem",
+      "/usr/local/include/OGRE/RTShaderSystem",
+      "-g",
+      "-c",
+      "-o",
+      "CMakeFiles/rigidSimul.dir/rigidSimul.cpp.o",
+      "/home/rodoc/develop/projects/OgreB/rigidSimul.cpp"
+    ],
+    "directory": "/home/rodoc/develop/projects/OgreB",
+    "file": "/home/rodoc/develop/projects/OgreB/rigidSimul.cpp",
+    "output": "/home/rodoc/develop/projects/OgreB/CMakeFiles/rigidSimul.dir/rigidSimul.cpp.o"
+  }
+]
