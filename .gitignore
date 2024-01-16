@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+# Visual studio file
+.vs
+CMakeFiles
+Debug
+Release
+*.vcxproj*
+CMakeCache.txt
+cmake_install.cmake

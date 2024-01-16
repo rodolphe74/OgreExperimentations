@@ -103,3 +103,39 @@ material Sky
         }
     }
 }
+
+
+material TrippySkyBox
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+			depth_write off
+
+			texture_unit
+			{
+				texture nm.png cubic
+				tex_address_mode clamp
+			}
+		}
+	}
+}
+
+
+material OgreLogo
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture 2560px-Ogre3d-logo.png
+				scale 0.05 0.05
+				// this means that the texture will be tiled 10 times (1/10 = 0.1)
+			}
+		}   
+	}
+}
