@@ -93,7 +93,9 @@ public:
 		body->setDamping(damping, 0);
 		dynamicsWorld->addRigidBody(body);
 		// keep reference to allocated body
-		bodies.insert(std::pair<Ogre::Node*, BodyParameters>(ogreNode, { mass, inertia, motionState, rigidShape, body, ogreNode, nullptr }));
+		int* t = new int;
+		*t = objectLifeTime;
+		bodies.insert(std::pair<Ogre::Node*, BodyParameters>(ogreNode, { mass, inertia, motionState, rigidShape, body, ogreNode, t }));
 	}
 
 	void addGround(Ogre::SceneNode* ogreNode) {
@@ -127,19 +129,47 @@ class KeyHandler : public OgreBites::InputListener
 };
 
 
+void addRandomCubeToTheScene(Physics &physics, Ogre::SceneManager& sceneManager, int currentTick)
+{
+	if (currentTick /*% timeInterval == 0*/ == 50 || currentTick == 100) {
+		/*Ogre::Real maxHeight = (Ogre::Real)-100.0f;
+		for (std::map<Ogre::Node*, BodyParameters>::iterator i = bodies.begin(); i != bodies.end(); i++) {
+			if (i->second.rigidBody) {
+				Ogre::Vector3 p = i->first->getPosition();
+				Ogre::Real height = p[2];
+				if (height > maxHeight) {
+					maxHeight = height;
+				}
+			}
+		}
+		std::cout << "MaxHeight" << maxHeight << std::endl;*/
+
+
+		Ogre::Entity* cubeEntity = sceneManager.createEntity("Cube.mesh");
+		std::string nodeName = "cubeNode" + std::to_string(currentTick);
+		Ogre::SceneNode* cubeNode = sceneManager.getRootSceneNode()->createChildSceneNode(nodeName);
+		cubeNode->setPosition(0, 13, 0);
+		cubeNode->scale(.5, .5, .5);
+		cubeNode->attachObject(cubeEntity);
+		physics.addBox(cubeNode, btVector3(0.5f, 0.5f, 0.5f), btScalar(0.1f), btVector3(0.0f, 1.0f, 0.0f), 0.2f);
+	}
+}
+
+
+
 class PhysFrameListener : public Ogre::FrameListener
 {
 private:
-	const Physics* physics;
-	const Ogre::SceneManager* sceneManager;
+	Physics* physics;
+	Ogre::SceneManager* sceneManager;
 
 public:
-	PhysFrameListener(const Physics& p, const Ogre::SceneManager& sm) :physics(&p), sceneManager(&sm) {};
+	PhysFrameListener(Physics& p, Ogre::SceneManager& sm) 
+		:physics(&p), sceneManager(&sm) {};
 
 	bool frameStarted(const Ogre::FrameEvent& evt)
 	{
 		physics->dynamicsWorld->stepSimulation(1.0f / 60.0f); //suppose you have 60 frames per second
-
 
 		//std::cout << "physic objects:" << physics->dynamicsWorld->getCollisionObjectArray().size() << std::endl;
 		for (int i = 0; i < physics->dynamicsWorld->getCollisionObjectArray().size(); i++) {
@@ -170,11 +200,8 @@ public:
 						(*t)--;
 					}
 					else if (t) {
-						// TODO
 						//physics->dynamicsWorld->removeRigidBody(body);
-						//Ogre::Entity *ent = static_cast<Ogre::Entity*>(sceneNode->detachObject((unsigned short) 0));
-						/* mSceneMgr->removeEntity(ent); */
-						/* mSceneMgr->destroySceneNode(myNode); */
+						//sceneManager->destroySceneNode(sceneNode);
 					}
 				}
 			}
@@ -184,6 +211,7 @@ public:
 
 	bool frameEnded(const Ogre::FrameEvent& evt)
 	{
+		addRandomCubeToTheScene(*physics, *sceneManager, tick);
 		tick++;
 		return true;
 	}
@@ -191,10 +219,6 @@ public:
 
 
 
-void addRandomCubeToTheScene()
-{
-
-}
 
 
 int main()
@@ -207,11 +231,8 @@ int main()
 	OgreBites::ApplicationContext ctx("Ogre-Bullet");
 	ctx.initApp();
 
-	
-
 	Ogre::Root* root = ctx.getRoot();
 	Ogre::SceneManager* sceneManager = root->createSceneManager();
-
 
 	PhysFrameListener* physFrameListener = new PhysFrameListener(physics, *sceneManager);
 	root->addFrameListener(physFrameListener);
@@ -255,23 +276,23 @@ int main()
 	groundNode->attachObject(groundEntity);
 	groundNode->yaw(Ogre::Degree(180));
 
-	// create a cube
-	Ogre::Entity* cubeEntityOne = sceneManager->createEntity("Cube.mesh");
-	Ogre::SceneNode* cubeNodeOne = sceneManager->getRootSceneNode()->createChildSceneNode("cubeNodeOne");
-	cubeNodeOne->scale(1.0, 1.0, 1.0);
-	cubeNodeOne->setPosition(0, 10, 0);
-	cubeNodeOne->attachObject(cubeEntityOne);
-	/* cubeNodeOne->yaw(Ogre::Degree(-30)); */
-	/* cubeNodeOne->pitch(Ogre::Degree(30)); */
+	//// create a cube
+	//Ogre::Entity* cubeEntityOne = sceneManager->createEntity("Cube.mesh");
+	//Ogre::SceneNode* cubeNodeOne = sceneManager->getRootSceneNode()->createChildSceneNode("cubeNodeOne");
+	//cubeNodeOne->scale(1.0, 1.0, 1.0);
+	//cubeNodeOne->setPosition(0, 10, 0);
+	//cubeNodeOne->attachObject(cubeEntityOne);
+	///* cubeNodeOne->yaw(Ogre::Degree(-30)); */
+	///* cubeNodeOne->pitch(Ogre::Degree(30)); */
 
-	// create another cube
-	Ogre::Entity* cubeEntityTwo = sceneManager->createEntity("Cube.mesh");
-	Ogre::SceneNode* cubeNodeTwo = sceneManager->getRootSceneNode()->createChildSceneNode("cubeNodeTwo");
-	cubeNodeTwo->setPosition(0, 13, 0);
-	cubeNodeTwo->scale(.5, .5, .5);
-	cubeNodeTwo->attachObject(cubeEntityTwo);
-	/* cubeNodeTwo->yaw(Ogre::Degree(30)); */
-	/* cubeNodeTwo->pitch(Ogre::Degree(30)); */
+	//// create another cube
+	//Ogre::Entity* cubeEntityTwo = sceneManager->createEntity("Cube.mesh");
+	//Ogre::SceneNode* cubeNodeTwo = sceneManager->getRootSceneNode()->createChildSceneNode("cubeNodeTwo");
+	//cubeNodeTwo->setPosition(0, 13, 0);
+	//cubeNodeTwo->scale(.5, .5, .5);
+	//cubeNodeTwo->attachObject(cubeEntityTwo);
+	///* cubeNodeTwo->yaw(Ogre::Degree(30)); */
+	///* cubeNodeTwo->pitch(Ogre::Degree(30)); */
 
 	// sky
 	sceneManager->setSkyBox(true, "TrippySkyBox", 99, false);
@@ -280,18 +301,12 @@ int main()
 	physics.addGround(groundNode);
 
 	// simulate air friction with a damping factor
-	physics.addBox(cubeNodeOne, btVector3(1.0f, 1.0f, 1.0f), btScalar(0.2f), btVector3(0.0f, 2.0f, 0.0f), 0.4f);
-	physics.addBox(cubeNodeTwo, btVector3(0.5f, 0.5f, 0.5f), btScalar(0.1f), btVector3(0.0f, 1.0f, 0.0f), 0.2f);
+	//physics.addBox(cubeNodeOne, btVector3(1.0f, 1.0f, 1.0f), btScalar(0.2f), btVector3(0.0f, 2.0f, 0.0f), 0.4f);
+	//physics.addBox(cubeNodeTwo, btVector3(0.5f, 0.5f, 0.5f), btScalar(0.1f), btVector3(0.0f, 1.0f, 0.0f), 0.2f);
 
 	// keys
 	KeyHandler keyHandler;
 	ctx.addInputListener(&keyHandler);
-	// root->getRenderSystem()->setConfigOption("Video Mode", "1366 x 768");
-	/* Ogre::RenderWindowDescription rw = root->getRenderSystem()->getRenderWindowDescription(); */
-	/* std::cout << "RenderWindow name:'" << rw.name << "'" << std::endl; */
-	/* Ogre::RenderTarget *rt = root->getRenderSystem()->getRenderTarget(rw.name); */
-	/* printf("RenderTarget:%p\n", (void *) rt); */
-	ctx.getRoot()->showConfigDialog(nullptr);
 
 	// Ogre loop
 	ctx.getRoot()->startRendering();
