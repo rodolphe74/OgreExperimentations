@@ -1,5 +1,6 @@
 #include "BulletDynamics/Dynamics/btRigidBody.h"
 #include <OgreCommon.h>
+#include <OgreRenderSystem.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -206,8 +207,11 @@ int main()
 	OgreBites::ApplicationContext ctx("Ogre-Bullet");
 	ctx.initApp();
 
+	
+
 	Ogre::Root* root = ctx.getRoot();
 	Ogre::SceneManager* sceneManager = root->createSceneManager();
+
 
 	PhysFrameListener* physFrameListener = new PhysFrameListener(physics, *sceneManager);
 	root->addFrameListener(physFrameListener);
@@ -282,7 +286,12 @@ int main()
 	// keys
 	KeyHandler keyHandler;
 	ctx.addInputListener(&keyHandler);
-
+	// root->getRenderSystem()->setConfigOption("Video Mode", "1366 x 768");
+	/* Ogre::RenderWindowDescription rw = root->getRenderSystem()->getRenderWindowDescription(); */
+	/* std::cout << "RenderWindow name:'" << rw.name << "'" << std::endl; */
+	/* Ogre::RenderTarget *rt = root->getRenderSystem()->getRenderTarget(rw.name); */
+	/* printf("RenderTarget:%p\n", (void *) rt); */
+	ctx.getRoot()->showConfigDialog(nullptr);
 
 	// Ogre loop
 	ctx.getRoot()->startRendering();
