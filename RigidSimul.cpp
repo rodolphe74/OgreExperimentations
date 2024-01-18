@@ -13,9 +13,13 @@
 
 // Globals
 constexpr int maxObjects = 10;
-constexpr int timeInterval = 100;
+constexpr int timeInterval = 50;
 constexpr int objectLifeTime = 300;
+// constexpr int waitFrames = 165/60;
+constexpr int waitFrames = 1;
+
 int tick = 0;
+int waitedFrames = 0;
 
 
 struct BodyParameters {
@@ -131,7 +135,7 @@ class KeyHandler : public OgreBites::InputListener
 
 void addRandomCubeToTheScene(Physics &physics, Ogre::SceneManager& sceneManager, int currentTick)
 {
-	if (currentTick /*% timeInterval == 0*/ == 50 || currentTick == 100) {
+	if (currentTick % timeInterval == 0) {
 		/*Ogre::Real maxHeight = (Ogre::Real)-100.0f;
 		for (std::map<Ogre::Node*, BodyParameters>::iterator i = bodies.begin(); i != bodies.end(); i++) {
 			if (i->second.rigidBody) {
@@ -169,6 +173,13 @@ public:
 
 	bool frameStarted(const Ogre::FrameEvent& evt)
 	{
+		if (waitedFrames > 0) {
+			waitedFrames--;
+			return true;
+		} else {
+			waitedFrames = waitFrames;
+		}
+		
 		physics->dynamicsWorld->stepSimulation(1.0f / 60.0f); //suppose you have 60 frames per second
 
 		//std::cout << "physic objects:" << physics->dynamicsWorld->getCollisionObjectArray().size() << std::endl;
@@ -230,6 +241,8 @@ int main()
 
 	OgreBites::ApplicationContext ctx("Ogre-Bullet");
 	ctx.initApp();
+
+	ctx.getRenderWindow()->setVSyncEnabled(true);
 
 	Ogre::Root* root = ctx.getRoot();
 	Ogre::SceneManager* sceneManager = root->createSceneManager();
