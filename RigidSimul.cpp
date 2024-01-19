@@ -11,15 +11,22 @@
 #include <OgreApplicationContext.h>
 #include <iostream>
 
+#ifdef _WINDOWS
+#pragma warning( disable : 26495 )
+#endif // _WINDOWS
+
+
 // Globals
-constexpr int maxObjects = 10;
-constexpr int timeInterval = 50;
-constexpr int objectLifeTime = 300;
-// constexpr int waitFrames = 165/60;
-constexpr int waitFrames = 1;
+constexpr int OBJECT_LIFE_TIME = 300;
+constexpr int WAIT_FRAMES = 0;
+constexpr float CAM_Y = 10.0f;
+constexpr float CAM_Z = 30.0f;
+constexpr float FAR_CLIP = 500.0f;
+constexpr int REFRESH_RATE = 60.0f;
 
 int tick = 0;
 int waitedFrames = 0;
+float cameraIncrement = 0;
 
 
 struct BodyParameters {
@@ -43,6 +50,7 @@ public:
 	btDiscreteDynamicsWorld* dynamicsWorld;
 	std::vector<btCollisionShape*> collisionShapes;
 	std::map<Ogre::Node*, BodyParameters> bodies;
+	Ogre::SceneNode* camera;
 
 	Physics()
 	{
@@ -52,6 +60,7 @@ public:
 		solver = new btSequentialImpulseConstraintSolver();
 		dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
 		dynamicsWorld->setGravity(btVector3(0.0f, -9.80665f, 0.0f)); // earth
+		camera = nullptr;
 	}
 
 	~Physics()
@@ -89,8 +98,8 @@ public:
 		btDefaultMotionState* motionState = new btDefaultMotionState(startTransform);
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motionState, rigidShape, inertia);
 		btRigidBody* body = new btRigidBody(rbInfo);
-		std::cout << "set mass to " << mass << std::endl;
-		std::cout << "set inertia to " << inertia[0] << "," << inertia[1] << "," << inertia[2] << std::endl;
+		//std::cout << "set mass to " << mass << std::endl;
+		//std::cout << "set inertia to " << inertia[0] << "," << inertia[1] << "," << inertia[2] << std::endl;
 		body->setMassProps(mass, inertia);
 		body->setRestitution(1);
 		body->setUserPointer(ogreNode);
@@ -98,7 +107,7 @@ public:
 		dynamicsWorld->addRigidBody(body);
 		// keep reference to allocated body
 		int* t = new int;
-		*t = objectLifeTime;
+		*t = OBJECT_LIFE_TIME;
 		bodies.insert(std::pair<Ogre::Node*, BodyParameters>(ogreNode, { mass, inertia, motionState, rigidShape, body, ogreNode, t }));
 	}
 
@@ -108,14 +117,14 @@ public:
 		groundTransform.setOrigin(btVector3(0, 0, 0));
 		btScalar groundMass(0.); //the mass is 0, because the ground is immovable (static)
 		btVector3 localGroundInertia(0, 0, 0);
-		btCollisionShape* groundShape = new btBoxShape(btVector3(10, 1, 10));
+		btCollisionShape* groundShape = new btBoxShape(btVector3(100, 0, 100));
 		btDefaultMotionState* groundMotionState = new btDefaultMotionState(groundTransform);
 		groundShape->calculateLocalInertia(groundMass, localGroundInertia);
 		btRigidBody::btRigidBodyConstructionInfo groundRBInfo(groundMass, groundMotionState, groundShape, localGroundInertia);
 		btRigidBody* groundBody = new btRigidBody(groundRBInfo);
 		dynamicsWorld->addRigidBody(groundBody);
 		int* lf = new int;
-		*lf = objectLifeTime;
+		*lf = OBJECT_LIFE_TIME;
 		bodies.insert(std::pair<Ogre::Node*, BodyParameters>(ogreNode, { groundMass, localGroundInertia, groundMotionState, nullptr, groundBody, ogreNode, lf }));
 	}
 };
@@ -135,27 +144,34 @@ class KeyHandler : public OgreBites::InputListener
 
 void addRandomCubeToTheScene(Physics &physics, Ogre::SceneManager& sceneManager, int currentTick)
 {
-	if (currentTick % timeInterval == 0) {
-		/*Ogre::Real maxHeight = (Ogre::Real)-100.0f;
-		for (std::map<Ogre::Node*, BodyParameters>::iterator i = bodies.begin(); i != bodies.end(); i++) {
-			if (i->second.rigidBody) {
-				Ogre::Vector3 p = i->first->getPosition();
-				Ogre::Real height = p[2];
-				if (height > maxHeight) {
-					maxHeight = height;
-				}
+	Ogre::Real maxHeight = (Ogre::Real)-100.0f;
+	for (std::map<Ogre::Node*, BodyParameters>::iterator i = physics.bodies.begin(); i != physics.bodies.end(); i++) {
+		if (i->second.rigidBody) {
+			Ogre::Vector3 p = i->first->getPosition();
+			Ogre::Real height = p[1];
+			if (height > maxHeight) {
+				maxHeight = height;
 			}
 		}
-		std::cout << "MaxHeight" << maxHeight << std::endl;*/
+	}
+	//std::cout << "MaxHeight" << maxHeight << std::endl;
 
+	if (maxHeight < 14) {
+
+		int x = std::rand() % 11 - 5;	// (0 to 10) minus 5
+		int s = std::rand() % 50 + 21;
+		float sf = s / 100.0f;
 
 		Ogre::Entity* cubeEntity = sceneManager.createEntity("Cube.mesh");
 		std::string nodeName = "cubeNode" + std::to_string(currentTick);
 		Ogre::SceneNode* cubeNode = sceneManager.getRootSceneNode()->createChildSceneNode(nodeName);
-		cubeNode->setPosition(0, 13, 0);
-		cubeNode->scale(.5, .5, .5);
+		cubeNode->setPosition(Ogre::Real(x), 15, 0);
+		//cubeNode->scale(.5, .5, .5);
+		cubeNode->scale(sf, sf, sf);
 		cubeNode->attachObject(cubeEntity);
-		physics.addBox(cubeNode, btVector3(0.5f, 0.5f, 0.5f), btScalar(0.1f), btVector3(0.0f, 1.0f, 0.0f), 0.2f);
+		//physics.addBox(cubeNode, btVector3(0.5f, 0.5f, 0.5f), btScalar(0.1f), btVector3(0.0f, 1.0f, 0.0f), 0.2f);
+		// simulate air friction with a damping factor
+		physics.addBox(cubeNode, btVector3(sf, sf, sf), btScalar(sf / 2), btVector3(0.0f, 1.0f, 0.0f), btScalar(sf / 2));
 	}
 }
 
@@ -177,10 +193,10 @@ public:
 			waitedFrames--;
 			return true;
 		} else {
-			waitedFrames = waitFrames;
+			waitedFrames = WAIT_FRAMES;
 		}
 		
-		physics->dynamicsWorld->stepSimulation(1.0f / 60.0f); //suppose you have 60 frames per second
+		physics->dynamicsWorld->stepSimulation(1.0f / REFRESH_RATE); //suppose you have 60 frames per second
 
 		//std::cout << "physic objects:" << physics->dynamicsWorld->getCollisionObjectArray().size() << std::endl;
 		for (int i = 0; i < physics->dynamicsWorld->getCollisionObjectArray().size(); i++) {
@@ -189,8 +205,6 @@ public:
 
 			if (body && body->isStaticObject()) {
 				// it should be the ground
-				/* body->applyCentralForce(btVector3(0.f,-2.0f,0.f)); */
-				/* body->setDamping(1.0f, 2*3.14f); */
 			}
 
 			else if (body && body->getMotionState()) {
@@ -208,7 +222,7 @@ public:
 					int* t = physics->bodies.at(sceneNode).lifeTime;
 					//std::cout << "lifeTime:" << *t << std::endl;
 					if (t && *t) {
-						(*t)--;
+						//(*t)--;
 					}
 					else if (t) {
 						//physics->dynamicsWorld->removeRigidBody(body);
@@ -217,6 +231,15 @@ public:
 				}
 			}
 		}
+
+		cameraIncrement+=.005f;
+		Ogre::Vector3 cp = physics->camera->getPosition();
+		Ogre::Vector3 lap = Ogre::Vector3(0, 0, 0);
+		Ogre::Vector3 dir = lap - cp;
+		
+		physics->camera->setDirection(dir);
+		physics->camera->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
+		physics->camera->setPosition(std::cos(cameraIncrement) * CAM_Z, cp[1], std::sin(cameraIncrement) * CAM_Z);
 		return true;
 	}
 
@@ -265,11 +288,15 @@ int main()
 	Ogre::SceneNode* camNode = sceneManager->getRootSceneNode()->createChildSceneNode();
 	Ogre::Camera* cam = sceneManager->createCamera("myCam");
 	cam->setNearClipDistance(Ogre::Real(0.1));
-	cam->setFarClipDistance(100);
+	cam->setFarClipDistance(FAR_CLIP);
 	cam->setAutoAspectRatio(true);
 	camNode->attachObject(cam);
-	camNode->setPosition(0, 5, 20);
-	// camNode->lookAt(Ogre::Vector3(0, 0, 0), Ogre::Node::TS_WORLD, Ogre::Vector3::UNIT_X);
+	Ogre::Vector3 cp = camNode->getPosition();
+	Ogre::Vector3 lap = Ogre::Vector3(0, 0, 0);
+	Ogre::Vector3 dir = lap - cp;
+	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
+	camNode->setPosition(std::cos(cameraIncrement) * CAM_Z, CAM_Y, std::sin(cameraIncrement) * CAM_Z);
+	physics.camera = camNode;
 
 	// and tell it to render into the main window
 	ctx.getRenderWindow()->addViewport(cam);
@@ -289,33 +316,11 @@ int main()
 	groundNode->attachObject(groundEntity);
 	groundNode->yaw(Ogre::Degree(180));
 
-	//// create a cube
-	//Ogre::Entity* cubeEntityOne = sceneManager->createEntity("Cube.mesh");
-	//Ogre::SceneNode* cubeNodeOne = sceneManager->getRootSceneNode()->createChildSceneNode("cubeNodeOne");
-	//cubeNodeOne->scale(1.0, 1.0, 1.0);
-	//cubeNodeOne->setPosition(0, 10, 0);
-	//cubeNodeOne->attachObject(cubeEntityOne);
-	///* cubeNodeOne->yaw(Ogre::Degree(-30)); */
-	///* cubeNodeOne->pitch(Ogre::Degree(30)); */
-
-	//// create another cube
-	//Ogre::Entity* cubeEntityTwo = sceneManager->createEntity("Cube.mesh");
-	//Ogre::SceneNode* cubeNodeTwo = sceneManager->getRootSceneNode()->createChildSceneNode("cubeNodeTwo");
-	//cubeNodeTwo->setPosition(0, 13, 0);
-	//cubeNodeTwo->scale(.5, .5, .5);
-	//cubeNodeTwo->attachObject(cubeEntityTwo);
-	///* cubeNodeTwo->yaw(Ogre::Degree(30)); */
-	///* cubeNodeTwo->pitch(Ogre::Degree(30)); */
-
 	// sky
-	sceneManager->setSkyBox(true, "TrippySkyBox", 99, false);
+	sceneManager->setSkyBox(true, "TrippySkyBox", 100, false);
 
 	// create the plane entity to the physics engine, and attach it to the node
 	physics.addGround(groundNode);
-
-	// simulate air friction with a damping factor
-	//physics.addBox(cubeNodeOne, btVector3(1.0f, 1.0f, 1.0f), btScalar(0.2f), btVector3(0.0f, 2.0f, 0.0f), 0.4f);
-	//physics.addBox(cubeNodeTwo, btVector3(0.5f, 0.5f, 0.5f), btScalar(0.1f), btVector3(0.0f, 1.0f, 0.0f), 0.2f);
 
 	// keys
 	KeyHandler keyHandler;
