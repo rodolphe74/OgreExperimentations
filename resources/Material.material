@@ -35,7 +35,7 @@ material Material
 }
 
 
-material Blau 
+material _Blau 
 {
     receive_shadows on 
 
@@ -68,6 +68,116 @@ material Blau
         }
     }
 }
+
+material Blau 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Material
+        {
+            ambient 0.0 0.077 1.0
+            diffuse 0.0 0.077 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.1 0.1 0.1
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+
+material Gelb 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Material
+        {
+            ambient 1.0 0.5 0.0
+			diffuse 1.0 0.5 0.0
+            specular 0.5 0.5 0.5 1.0 12.5
+			emissive 0.1 0.1 0.1
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+
+
+vertex_program bypassVertex glsl 
+{
+	source bypassVertex.glsl
+}
+
+fragment_program redFragment glsl 
+{
+	source redFragment.glsl
+}
+
+
+material SimpleRedFragment
+{ 
+	technique
+	{ 
+		pass 
+		{ 
+			ambient 0.1 0.1 0.1
+			diffuse 0.7 0.7 0.7
+			specular 0.5 0.5 0.5 128
+ 
+			vertex_program_ref bypassVertex
+			{
+				param_named_auto LightPosition light_position 0
+				param_named_auto EyePosition camera_position
+				param_named_auto worldViewProj worldviewproj_matrix
+			}
+			
+			fragment_program_ref redFragment
+			{ 
+				// param_named_auto fvDiffuse light_diffuse_colour 0
+				// param_named_auto fvSpecular light_specular_colour 0
+				// param_named_auto fvAmbient light_ambient_colour 0
+				// param_named bumpMap int 0
+				// param_named baseMap int 1
+			} 
+		} 
+	} 
+}
+
 
 
 material Sky

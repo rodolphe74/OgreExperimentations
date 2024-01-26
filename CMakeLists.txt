@@ -19,3 +19,16 @@ endif(UNIX)
 if(MSVC)
 target_link_libraries(rigidSimul OgreBites ${BULLET_LIBRARIES})
 endif(MSVC)
+
+
+add_executable(rook Rook.cpp)
+
+if(UNIX)
+target_include_directories(rook PRIVATE OBJ-Loader/Source)
+target_link_libraries(rook OgreBites ${BULLET_LIBRARIES} -lGL -lGLU)
+endif(UNIX)
+
+if(MSVC)
+target_include_directories(rook PRIVATE OBJ-Loader/Source)
+target_link_libraries(rook OgreBites ${BULLET_LIBRARIES})
+endif(MSVC)

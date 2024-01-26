@@ -22,7 +22,7 @@ constexpr int WAIT_FRAMES = 0;
 constexpr float CAM_Y = 10.0f;
 constexpr float CAM_Z = 30.0f;
 constexpr float FAR_CLIP = 500.0f;
-constexpr int REFRESH_RATE = 60.0f;
+constexpr int REFRESH_RATE = 75.0f;
 
 int tick = 0;
 int waitedFrames = 0;
@@ -144,19 +144,20 @@ class KeyHandler : public OgreBites::InputListener
 
 void addRandomCubeToTheScene(Physics &physics, Ogre::SceneManager& sceneManager, int currentTick)
 {
-	Ogre::Real maxHeight = (Ogre::Real)-100.0f;
-	for (std::map<Ogre::Node*, BodyParameters>::iterator i = physics.bodies.begin(); i != physics.bodies.end(); i++) {
-		if (i->second.rigidBody) {
-			Ogre::Vector3 p = i->first->getPosition();
-			Ogre::Real height = p[1];
-			if (height > maxHeight) {
-				maxHeight = height;
-			}
-		}
-	}
+	//Ogre::Real maxHeight = (Ogre::Real)-100.0f;
+	//for (std::map<Ogre::Node*, BodyParameters>::iterator i = physics.bodies.begin(); i != physics.bodies.end(); i++) {
+	//	if (i->second.rigidBody) {
+	//		Ogre::Vector3 p = i->first->getPosition();
+	//		Ogre::Real height = p[1];
+	//		if (height > maxHeight) {
+	//			maxHeight = height;
+	//		}
+	//	}
+	//}
 	//std::cout << "MaxHeight" << maxHeight << std::endl;
 
-	if (maxHeight < 14) {
+	//if (maxHeight < 14) {
+	if (currentTick % (REFRESH_RATE / 5) == 0) {
 
 		int x = std::rand() % 11 - 5;	// (0 to 10) minus 5
 		int s = std::rand() % 50 + 21;
@@ -177,14 +178,14 @@ void addRandomCubeToTheScene(Physics &physics, Ogre::SceneManager& sceneManager,
 
 
 
-class PhysFrameListener : public Ogre::FrameListener
+class RookFrameListener : public Ogre::FrameListener
 {
 private:
 	Physics* physics;
 	Ogre::SceneManager* sceneManager;
 
 public:
-	PhysFrameListener(Physics& p, Ogre::SceneManager& sm) 
+	RookFrameListener(Physics& p, Ogre::SceneManager& sm) 
 		:physics(&p), sceneManager(&sm) {};
 
 	bool frameStarted(const Ogre::FrameEvent& evt)
@@ -270,7 +271,7 @@ int main()
 	Ogre::Root* root = ctx.getRoot();
 	Ogre::SceneManager* sceneManager = root->createSceneManager();
 
-	PhysFrameListener* physFrameListener = new PhysFrameListener(physics, *sceneManager);
+	RookFrameListener* physFrameListener = new RookFrameListener(physics, *sceneManager);
 	root->addFrameListener(physFrameListener);
 
 	// Shader init
