@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- exporter: blender2ogre 0.8.3 -->
+<!-- export_time: Fri, 26 Jan 2024 08:21:51 +0000 -->
+<!-- previous_export_time: Fri, 26 Jan 2024 04:24:55 +0000 -->
+<scene author="rodoc" formatVersion="1.1" >
+  <nodes >
+    <node name="Mesh.004" >
+      <position x="0.028680" y="0.017603" z="-0.009582" />
+      <rotation qw="0.707107" qx="0.707107" qy="0.000000" qz="0.000000" />
+      <scale x="1.000000" y="1.000000" z="1.000000" />
+      <userData >
+        <property data='&lt;bpy id prop: owner="OBMesh.004", name="cycles_visibility", address=0x7fe473c4f9a8&gt;' name="cycles_visibility" type="IDPropertyGroup" />
+      </userData>
+      <entity meshFile="knight_copy12.000.mesh" name="Mesh.004" >
+        <userData >
+          <property data='&lt;bpy id prop: owner="MEknight_copy12.000", name="cycles", address=0x7fe473c52388&gt;' name="cycles" type="IDPropertyGroup" />
+        </userData>
+      </entity>
+    </node>
+    <node name="Mesh.024" >
+      <position x="-0.019866" y="-0.008641" z="0.011828" />
+      <rotation qw="0.707107" qx="0.707107" qy="0.000000" qz="0.000000" />
+      <scale x="1.000000" y="1.000000" z="1.000000" />
+      <userData >
+        <property data='&lt;bpy id prop: owner="OBMesh.024", name="cycles_visibility", address=0x7fe473c4f408&gt;' name="cycles_visibility" type="IDPropertyGroup" />
+      </userData>
+      <entity meshFile="rook_hi_copy13.003.mesh" name="Mesh.024" >
+        <userData >
+          <property data='&lt;bpy id prop: owner="MErook_hi_copy13.003", name="cycles", address=0x7fe473c52748&gt;' name="cycles" type="IDPropertyGroup" />
+        </userData>
+      </entity>
+    </node>
+    <node name="Mesh.011" >
+      <position x="0.000001" y="-0.000005" z="0.004765" />
+      <rotation qw="0.707107" qx="0.707107" qy="0.000000" qz="0.000000" />
+      <scale x="1.000000" y="1.000000" z="1.000000" />
+      <userData >
+        <property data='&lt;bpy id prop: owner="OBMesh.011", name="cycles_visibility", address=0x7fe473c4f4a8&gt;' name="cycles_visibility" type="IDPropertyGroup" />
+      </userData>
+      <entity meshFile="pawn_copy13.008.mesh" name="Mesh.011" >
+        <userData >
+          <property data='&lt;bpy id prop: owner="MEpawn_copy13.008", name="cycles", address=0x7fe473c524c8&gt;' name="cycles" type="IDPropertyGroup" />
+        </userData>
+      </entity>
+    </node>
+    <node name="Mesh.009" >
+      <position x="0.035230" y="-0.010250" z="-0.004274" />
+      <rotation qw="0.707107" qx="0.707107" qy="0.000000" qz="0.000000" />
+      <scale x="1.000000" y="1.000000" z="1.000000" />
+      <userData >
+        <property data='&lt;bpy id prop: owner="OBMesh.009", name="cycles_visibility", address=0x7fe473c4fc28&gt;' name="cycles_visibility" type="IDPropertyGroup" />
+      </userData>
+      <entity meshFile="bishop_copy10.002.mesh" name="Mesh.009" >
+        <userData >
+          <property data='&lt;bpy id prop: owner="MEbishop_copy10.002", name="cycles", address=0x7fe473c51fc8&gt;' name="cycles" type="IDPropertyGroup" />
+        </userData>
+      </entity>
+    </node>
+    <node name="Mesh.008" >
+      <position x="-0.000000" y="-0.000326" z="-0.010625" />
+      <rotation qw="0.707107" qx="0.707107" qy="0.000000" qz="0.000000" />
+      <scale x="1.000000" y="1.000000" z="1.000000" />
+      <userData >
+        <property data='&lt;bpy id prop: owner="OBMesh.008", name="cycles_visibility", address=0x7fe473c4fae8&gt;' name="cycles_visibility" type="IDPropertyGroup" />
+      </userData>
+      <entity meshFile="king_copy11.001.mesh" name="Mesh.008" >
+        <userData >
+          <property data='&lt;bpy id prop: owner="MEking_copy11.001", name="cycles", address=0x7fe473c52248&gt;' name="cycles" type="IDPropertyGroup" />
+        </userData>
+      </entity>
+    </node>
+    <node name="Mesh.001" >
+      <position x="0.000000" y="0.000000" z="0.000000" />
+      <rotation qw="0.707107" qx="0.707107" qy="0.000000" qz="0.000000" />
+      <scale x="1.000000" y="1.000000" z="1.000000" />
+      <userData >
+        <property data='&lt;bpy id prop: owner="OBMesh.001", name="cycles_visibility", address=0x7fe473c4fea8&gt;' name="cycles_visibility" type="IDPropertyGroup" />
+        <property data='&lt;bpy id prop: owner="OBMesh.001", name="cycles", address=0x7fe473c4fe08&gt;' name="cycles" type="IDPropertyGroup" />
+      </userData>
+      <entity meshFile="queen_copy14.001.mesh" name="Mesh.001" >
+        <userData >
+          <property data='&lt;bpy id prop: owner="MEqueen_copy14.001", name="cycles", address=0x7fe473c52608&gt;' name="cycles" type="IDPropertyGroup" />
+        </userData>
+      </entity>
+    </node>
+    <node name="Camera" >
+      <position x="-11.343511" y="-3.755203" z="2.263638" />
+      <rotation qw="0.681314" qx="0.636497" qy="-0.239705" qz="-0.270600" />
+      <scale x="1.000000" y="1.000000" z="1.000000" />
+      <camera fov="0.503380" name="Camera" projectionType="perspective" >
+        <clipping far="100.000000" near="0.100000" />
+      </camera>
+    </node>
+  </nodes>
+  <externals >
+    <item type="material" >
+      <file name="green.material" />
+    </item>
+    <item type="material" >
+      <file name="black_chess.material" />
+    </item>
+  </externals>
+  <environment >
+    <colourBackground b="0.050000" g="0.050000" r="0.050000" />
+  </environment>
+</scene>

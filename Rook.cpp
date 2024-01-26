@@ -6,7 +6,6 @@
 #include <Ogre.h>
 #include <OgreApplicationContext.h>
 #include <iostream>
-#include <OBJ_Loader.h>
 
 #ifdef _WINDOWS
 #pragma warning( disable : 26495 )
@@ -61,38 +60,6 @@ public:
 		return true;
 	}
 };
-
-
-
-class ObjLoader {
-public:
-	static std::vector<Ogre::ManualObject *> loadObjTriangle(std::string filename, Ogre::SceneManager &sceneManager, Ogre::MaterialPtr &defaultMaterial) {
-		std::vector<Ogre::ManualObject *> list;
-
-		objl::Loader Loader;
-		Loader.LoadFile(filename);
-		for (int i = 0; i < Loader.LoadedMeshes.size(); i++) {
-			objl::Mesh curMesh = Loader.LoadedMeshes[i];
-
-			Ogre::ManualObject *manualObject = sceneManager.createManualObject(curMesh.MeshName);
-			manualObject->begin("Blau", Ogre::RenderOperation::OT_TRIANGLE_LIST);
-
-			for (int j = 0; j < curMesh.Vertices.size(); j++) {
-				for (int j = 0; j < curMesh.Indices.size(); j += 3) {
-					manualObject->triangle(curMesh.Indices[j], curMesh.Indices[j + 1], curMesh.Indices[j + 2]);
-				}
-			}
-			
-			// manualObject->setMaterial(0, defaultMaterial);
-			//manualObject->setMaterialName(0, "Blau");
-			manualObject->end();
-			list.push_back(manualObject);
-		}
-
-		return list;
-	}
-};
-
 
 
 
