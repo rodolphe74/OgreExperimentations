@@ -23,7 +23,7 @@ material Material
             light_clip_planes off
             light_scissor off
             lighting on
-            normalise_normals off
+            // normalise_normals off
             polygon_mode solid
             scene_blend one zero
             scene_blend_op add
@@ -58,7 +58,7 @@ material _Blau
             light_clip_planes off
             light_scissor off
             lighting on
-            normalise_normals off
+            // normalise_normals off
             polygon_mode solid
             scene_blend one zero
             scene_blend_op add
@@ -92,7 +92,7 @@ material Blau
             light_clip_planes off
             light_scissor off
             lighting on
-            normalise_normals off
+            // normalise_normals off
             polygon_mode solid
             scene_blend one zero
             scene_blend_op add
@@ -126,7 +126,7 @@ material Gelb
             light_clip_planes off
             light_scissor off
             lighting on
-            normalise_normals off
+            // normalise_normals off
             polygon_mode solid
             scene_blend one zero
             scene_blend_op add
@@ -161,8 +161,8 @@ material SimpleRedFragment
  
 			vertex_program_ref bypassVertex
 			{
-				param_named_auto LightPosition light_position 0
-				param_named_auto EyePosition camera_position
+				// param_named_auto lightPosition light_position 0
+				// param_named_auto eyePosition camera_position
 				param_named_auto worldViewProj worldviewproj_matrix
 			}
 			
@@ -201,8 +201,8 @@ material FlatFragment
  
 			vertex_program_ref basicVertex
 			{
-				param_named_auto LightPosition light_position 0
-				param_named_auto EyePosition camera_position
+				param_named_auto lightPosition light_position 0
+				param_named_auto cameraPosition camera_position
 				param_named_auto worldViewProj worldviewproj_matrix
 			}
 			
@@ -218,6 +218,39 @@ material FlatFragment
 	} 
 }
 
+fragment_program smoothFragment glsl 
+{
+	source smoothFragment.glsl
+}
+
+material SmoothFragment
+{ 
+	technique
+	{ 
+		pass 
+		{ 
+			ambient 0.1 0.1 0.1
+			diffuse 0.7 0.7 0.7
+			specular 0.5 0.5 0.5 128
+ 
+			vertex_program_ref basicVertex
+			{
+				param_named_auto lightPosition light_position 0
+				param_named_auto cameraPosition camera_position
+				param_named_auto worldViewProj worldviewproj_matrix
+			}
+			
+			fragment_program_ref smoothFragment
+			{ 
+				// param_named_auto fvDiffuse light_diffuse_colour 0
+				// param_named_auto fvSpecular light_specular_colour 0
+				// param_named_auto fvAmbient light_ambient_colour 0
+				// param_named bumpMap int 0
+				// param_named baseMap int 1
+			} 
+		} 
+	} 
+}
 
 
 material Sky
@@ -243,7 +276,7 @@ material Sky
             light_clip_planes off
             light_scissor off
             lighting on
-            normalise_normals off
+            // normalise_normals off
             polygon_mode solid
             scene_blend one zero
             scene_blend_op add

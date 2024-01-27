@@ -15,16 +15,18 @@
 // Globals
 constexpr int OBJECT_LIFE_TIME = 300;
 constexpr int WAIT_FRAMES = 0;
-constexpr float CAM_Y = 10.0f;
-constexpr float CAM_Z = 30.0f;
+constexpr float RADIUS = 2.0f;
 constexpr float FAR_CLIP = 500.0f;
 constexpr int REFRESH_RATE = 75;
 
 int tick = 0;
 int waitedFrames = 0;
-float cameraIncrement = 0;
+float angleIncrement = 0;
 
-
+Ogre::Entity *rookEntity;
+Ogre::Entity *rookEntityTwo;
+Ogre::SceneNode *rookNode;
+Ogre::SceneNode *rookNodeTwo;
 
 
 class KeyHandler : public OgreBites::InputListener
@@ -51,6 +53,19 @@ public:
 
 	bool frameStarted(const Ogre::FrameEvent &evt)
 	{
+
+		angleIncrement+=.01f;
+
+		rookNode->setPosition(
+			-1 + std::cos(angleIncrement) * RADIUS, 
+			rookNode->getPosition()[1], 
+			10 + std::sin(angleIncrement) * RADIUS);
+
+		rookNodeTwo->setPosition(
+		1 - std::cos(angleIncrement) * RADIUS, 
+		rookNodeTwo->getPosition()[1], 
+		10 - std::sin(angleIncrement) * RADIUS);
+
 		return true;
 	}
 
@@ -101,9 +116,7 @@ int main()
 	Ogre::Vector3 lap = Ogre::Vector3(0, 0, 0);
 	Ogre::Vector3 dir = lap - cp;
 	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-	camNode->setPosition(0, 3, 20);
-	// camNode->setPosition(std::cos(cameraIncrement) * CAM_Z, CAM_Y, std::sin(cameraIncrement) * CAM_Z);
-	// and tell it to render into the main window
+	camNode->setPosition(0, 6, 26);
 	ctx.getRenderWindow()->addViewport(cam);
 
 
@@ -135,20 +148,18 @@ int main()
 	//rookNode->pitch(Ogre::Degree(-90));
 
 
-	Ogre::Entity *rookEntity = sceneManager->createEntity("rook.mesh");
+	rookEntity = sceneManager->createEntity("rook.mesh");
 	Ogre::MaterialPtr shaderMaterial = Ogre::MaterialManager::getSingleton().getByName("FlatFragment");
 	rookEntity->setMaterial(shaderMaterial);
-	Ogre::SceneNode *rookNode = sceneManager->getRootSceneNode()->createChildSceneNode("Rook");
-	rookNode->setPosition(1, 2, 14);
+	rookNode = sceneManager->getRootSceneNode()->createChildSceneNode("Rook");
+	rookNode->setPosition(-1, 2, 10);
 	rookNode->attachObject(rookEntity);
 
-
-
-	Ogre::Entity *rookEntityTwo = sceneManager->createEntity("rook.mesh");
+	rookEntityTwo = sceneManager->createEntity("rook.mesh");
 	Ogre::MaterialPtr blauMaterial = Ogre::MaterialManager::getSingleton().getByName("Blau");
 	rookEntityTwo->setMaterial(blauMaterial);
-	Ogre::SceneNode *rookNodeTwo = sceneManager->getRootSceneNode()->createChildSceneNode("RookTwo");
-	rookNodeTwo->setPosition(-4, 2, 0);
+	rookNodeTwo = sceneManager->getRootSceneNode()->createChildSceneNode("RookTwo");
+	rookNodeTwo->setPosition(1, 2, 10);
 	rookNodeTwo->attachObject(rookEntityTwo);
 
 	Ogre::Entity *bishop = sceneManager->createEntity("bishop.mesh");

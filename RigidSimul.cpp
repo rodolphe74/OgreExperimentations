@@ -20,13 +20,13 @@
 constexpr int OBJECT_LIFE_TIME = 300;
 constexpr int WAIT_FRAMES = 0;
 constexpr float CAM_Y = 10.0f;
-constexpr float CAM_Z = 30.0f;
+constexpr float RADIUS = 30.0f;
 constexpr float FAR_CLIP = 500.0f;
 constexpr int REFRESH_RATE = 75.0f;
 
 int tick = 0;
 int waitedFrames = 0;
-float cameraIncrement = 0;
+float angleIncrement = 0;
 
 
 struct BodyParameters {
@@ -233,14 +233,14 @@ public:
 			}
 		}
 
-		cameraIncrement+=.005f;
+		angleIncrement+=.005f;
 		Ogre::Vector3 cp = physics->camera->getPosition();
 		Ogre::Vector3 lap = Ogre::Vector3(0, 0, 0);
 		Ogre::Vector3 dir = lap - cp;
 		
 		physics->camera->setDirection(dir);
 		physics->camera->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-		physics->camera->setPosition(std::cos(cameraIncrement) * CAM_Z, cp[1], std::sin(cameraIncrement) * CAM_Z);
+		physics->camera->setPosition(std::cos(angleIncrement) * RADIUS, cp[1], std::sin(angleIncrement) * RADIUS);
 		return true;
 	}
 
@@ -296,7 +296,7 @@ int main()
 	Ogre::Vector3 lap = Ogre::Vector3(0, 0, 0);
 	Ogre::Vector3 dir = lap - cp;
 	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-	camNode->setPosition(std::cos(cameraIncrement) * CAM_Z, CAM_Y, std::sin(cameraIncrement) * CAM_Z);
+	camNode->setPosition(std::cos(angleIncrement) * RADIUS, CAM_Y, std::sin(angleIncrement) * RADIUS);
 	physics.camera = camNode;
 
 	// and tell it to render into the main window

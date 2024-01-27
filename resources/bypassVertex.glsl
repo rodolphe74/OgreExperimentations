@@ -1,5 +1,5 @@
-uniform vec3 LightPosition;
-uniform vec3 EyePosition;
+uniform vec3 lightPosition;
+uniform vec3 eyePosition;
 uniform mat4 worldViewProj;	//= gl_ModelViewProjectionMatrix ?
 
 void main()
