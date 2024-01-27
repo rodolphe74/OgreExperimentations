@@ -134,6 +134,16 @@ int main()
 	//rookNode->attachObject(rookEntity);
 	//rookNode->pitch(Ogre::Degree(-90));
 
+
+	Ogre::Entity *rookEntity = sceneManager->createEntity("rook.mesh");
+	Ogre::MaterialPtr shaderMaterial = Ogre::MaterialManager::getSingleton().getByName("FlatFragment");
+	rookEntity->setMaterial(shaderMaterial);
+	Ogre::SceneNode *rookNode = sceneManager->getRootSceneNode()->createChildSceneNode("Rook");
+	rookNode->setPosition(1, 2, 14);
+	rookNode->attachObject(rookEntity);
+
+
+
 	Ogre::Entity *rookEntityTwo = sceneManager->createEntity("rook.mesh");
 	Ogre::MaterialPtr blauMaterial = Ogre::MaterialManager::getSingleton().getByName("Blau");
 	rookEntityTwo->setMaterial(blauMaterial);
