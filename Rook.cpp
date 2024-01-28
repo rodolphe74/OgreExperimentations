@@ -150,13 +150,13 @@ int main()
 	Ogre::MaterialPtr shaderMaterial = Ogre::MaterialManager::getSingleton().getByName("FlatFragment");
 	Ogre::MaterialPtr monochromeOrderedDitherMaterial = Ogre::MaterialManager::getSingleton().getByName("MonochromeOrderedFragment");
 
-	rookEntity = sceneManager->createEntity("rook.mesh");
-	rookEntity->setMaterial(shaderMaterial);
+	rookEntity = sceneManager->createEntity("king.mesh");
+	rookEntity->setMaterial(monochromeOrderedDitherMaterial);
 	rookNode = sceneManager->getRootSceneNode()->createChildSceneNode("Rook");
 	rookNode->setPosition(-1, 2, 10);
 	rookNode->attachObject(rookEntity);
 
-	rookEntityTwo = sceneManager->createEntity("rook.mesh");
+	rookEntityTwo = sceneManager->createEntity("queen.mesh");
 	rookEntityTwo->setMaterial(monochromeOrderedDitherMaterial);
 	rookNodeTwo = sceneManager->getRootSceneNode()->createChildSceneNode("RookTwo");
 	rookNodeTwo->setPosition(1, 2, 10);

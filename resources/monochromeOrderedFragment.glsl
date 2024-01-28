@@ -5,7 +5,7 @@ varying vec3 normalPositionF;
 varying vec4 lightPositionF;
 varying vec3 cameraPositionF;
 
-const vec3 ambiant = vec3(.0f, .5f, .0f);
+const vec3 ambiant = vec3(.0f, .0f, .0f);
 
 const int indexMatrix4x4[16] = int[](
 	0,  8,  2,  10,
