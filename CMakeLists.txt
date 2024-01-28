@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 project(OgreB)
 
 if(UNIX)
-set(CMAKE_CXX_FLAGS -O ${cxxflags})
+set(CMAKE_CXX_FLAGS -g ${cxxflags})
 endif(UNIX)
 
 find_package(OGRE REQUIRED COMPONENTS Bites CONFIG)

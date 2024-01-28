@@ -6,18 +6,15 @@
 #include <Ogre.h>
 #include <OgreApplicationContext.h>
 #include <iostream>
+#include "Rook.h"
 
 #ifdef _WINDOWS
 #pragma warning( disable : 26495 )
 #endif // _WINDOWS
 
 
-// Globals
-constexpr int OBJECT_LIFE_TIME = 300;
-constexpr int WAIT_FRAMES = 0;
-constexpr float RADIUS = 2.0f;
-constexpr float FAR_CLIP = 500.0f;
-constexpr int REFRESH_RATE = 75;
+
+
 
 int tick = 0;
 int waitedFrames = 0;
@@ -27,6 +24,8 @@ Ogre::Entity *rookEntity;
 Ogre::Entity *rookEntityTwo;
 Ogre::SceneNode *rookNode;
 Ogre::SceneNode *rookNodeTwo;
+
+
 
 
 class KeyHandler : public OgreBites::InputListener
@@ -134,19 +133,6 @@ int main()
 	groundNode->attachObject(groundEntity);
 	groundNode->yaw(Ogre::Degree(180));
 
-	
-
-	// mesh
-	//Ogre::Entity *rookEntity = sceneManager->createEntity("rook.mesh");
-	//Ogre::MaterialPtr shaderMaterial = Ogre::MaterialManager::getSingleton().getByName("SimpleRedFragment");
-	//rookEntity->setMaterial(shaderMaterial);
-	//Ogre::SceneNode *rookNode = sceneManager->getRootSceneNode()->createChildSceneNode("Rook");
-	//rookNode->setPosition(-2, 1.5, 0);
-
-	//rookNode->scale(.2, .2, .2);
-	//rookNode->attachObject(rookEntity);
-	//rookNode->pitch(Ogre::Degree(-90));
-
 	Ogre::MaterialPtr shaderMaterial = Ogre::MaterialManager::getSingleton().getByName("FlatFragment");
 	Ogre::MaterialPtr monochromeOrderedDitherMaterial = Ogre::MaterialManager::getSingleton().getByName("MonochromeOrderedFragment");
 	Ogre::MaterialPtr darkMonochromeOrderedDitherMaterial = Ogre::MaterialManager::getSingleton().getByName("DarkMonochromeOrderedFragment");
@@ -154,13 +140,13 @@ int main()
 	rookEntity = sceneManager->createEntity("king.mesh");
 	rookEntity->setMaterial(darkMonochromeOrderedDitherMaterial);
 	rookNode = sceneManager->getRootSceneNode()->createChildSceneNode("DitheredKing");
-	rookNode->setPosition(-1, 2, 10);
+	rookNode->setPosition(-1, 0, 10);
 	rookNode->attachObject(rookEntity);
 
 	rookEntityTwo = sceneManager->createEntity("queen.mesh");
 	rookEntityTwo->setMaterial(monochromeOrderedDitherMaterial);
 	rookNodeTwo = sceneManager->getRootSceneNode()->createChildSceneNode("DitheredQueen");
-	rookNodeTwo->setPosition(1, 2, 10);
+	rookNodeTwo->setPosition(1, 0, 10);
 	rookNodeTwo->attachObject(rookEntityTwo);
 
 	
@@ -170,37 +156,40 @@ int main()
 	Ogre::Entity *bishop = sceneManager->createEntity("bishop.mesh");
 	bishop->setMaterial(gelbMaterial);
 	Ogre::SceneNode *bishopNode = sceneManager->getRootSceneNode()->createChildSceneNode("bishop");
-	bishopNode->setPosition(-2, 2, 0);
+	bishopNode->setPosition(-2, 0, 0);
 	bishopNode->attachObject(bishop);
 
 	Ogre::Entity *knight = sceneManager->createEntity("knight.mesh");
 	knight->setMaterial(gelbMaterial);
 	Ogre::SceneNode *knightNode = sceneManager->getRootSceneNode()->createChildSceneNode("knight");
-	knightNode->setPosition(0, 2, 0);
+	knightNode->setPosition(0, 0, 0);
 	knightNode->attachObject(knight);
 
 	Ogre::Entity *rookOne = sceneManager->createEntity("rook.mesh");
 	rookOne->setMaterial(blauMaterial);
 	Ogre::SceneNode *rookOneNode = sceneManager->getRootSceneNode()->createChildSceneNode("rookOne");
-	rookOneNode->setPosition(2, 2, 0);
+	rookOneNode->setPosition(2, 0, 0);
 	rookOneNode->attachObject(rookOne);
 
 	Ogre::Entity *rookTwo = sceneManager->createEntity("rook.mesh");
 	rookTwo->setMaterial(gelbMaterial);
 	Ogre::SceneNode *rookTwoNode = sceneManager->getRootSceneNode()->createChildSceneNode("rookTwo");
-	rookTwoNode->setPosition(4, 2, 0);
+	rookTwoNode->setPosition(4, 0, 0);
 	rookTwoNode->attachObject(rookTwo);
 
 	Ogre::Entity *pawn = sceneManager->createEntity("pawn.mesh");
 	pawn->setMaterial(gelbMaterial);
 	Ogre::SceneNode *pawnNode = sceneManager->getRootSceneNode()->createChildSceneNode("pawn");
-	pawnNode->setPosition(6, 2, 0);
+	pawnNode->setPosition(6, 0, 0);
 	pawnNode->attachObject(pawn);
 
+    createBoard(sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
+	setPieceOnBoard(WHITE_ROOK, 0, 0, sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
+	setPieceOnBoard(BLACK_KNIGHT, 1, 0, sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
+	setPieceOnBoard(BLACK_BISHOP, 2, 0, sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
 
-	//ObjLoader::loadObjTriangle("resources/Chessboard.obj", *sceneManager, blauMaterial);
 
-	// sky
+    // sky
 	sceneManager->setSkyBox(true, "TrippySkyBox", 100, false);
 
 	// keys
@@ -214,4 +203,84 @@ int main()
 	delete physFrameListener;
 	//delete logManager;
 	return 0;
+}
+
+void createBoard(Ogre::SceneManager *sceneManager, Ogre::MaterialPtr &monochromeOrderedDitherMaterial, Ogre::MaterialPtr &darkMonochromeOrderedDitherMaterial)
+{
+    bool black = true;
+
+    for (int y = 0; y < 8; y++)
+    {
+        for (int x = 0; x < 8; x++)
+        {
+            std::string nodeName = std::string(1, 'a' + x).append(std::to_string(y + 1));
+            Ogre::Entity *square = sceneManager->createEntity("cube.mesh");
+
+            if (!black)
+                square->setMaterial(monochromeOrderedDitherMaterial);
+            else
+                square->setMaterial(darkMonochromeOrderedDitherMaterial);
+            black = !black;
+
+            Ogre::SceneNode *squareNode = sceneManager->getRootSceneNode()->createChildSceneNode(nodeName);
+            squareNode->setPosition(X_START + x * SQUARE_WIDTH * 2, 0, Y_START - y * SQUARE_HEIGHT * 2);
+            squareNode->setScale(SQUARE_WIDTH, 0 + BOARD_THICKNESS, SQUARE_HEIGHT);
+            squareNode->attachObject(square);
+        }
+        black = !black;
+    }
+}
+
+void setPieceOnBoard(PIECE_ENUM piece, int x, int y, Ogre::SceneManager *sceneManager, Ogre::MaterialPtr &whiteMaterialPtr, Ogre::MaterialPtr &blackMaterialPtr)
+{
+	Ogre::SceneNode *sceneNode = nullptr;
+	if (piecesMap.find(piece) != piecesMap.end()) {
+		Piece p = piecesMap[piece];
+		sceneNode = p.node;
+	}
+	else {
+		Ogre::Entity *entity;
+		switch (piece)
+		{
+		case BLACK_ROOK:
+			entity = entity = sceneManager->createEntity("rook.mesh");
+			break;
+		case BLACK_KNIGHT:
+			entity = entity = sceneManager->createEntity("knight.mesh");
+			break;
+		case BLACK_BISHOP:
+			entity = entity = sceneManager->createEntity("bishop.mesh");
+			break;
+		case BLACK_QUEEN:
+			entity = entity = sceneManager->createEntity("queen.mesh");
+			break;
+		case BLACK_KING:
+			entity = entity = sceneManager->createEntity("king.mesh");
+			break;
+		case WHITE_ROOK:
+			entity = entity = sceneManager->createEntity("rook.mesh");
+			break;
+		case WHITE_KNIGHT:
+			entity = entity = sceneManager->createEntity("knight.mesh");
+			break;
+		case WHITE_BISHOP:
+			entity = entity = sceneManager->createEntity("bishop.mesh");
+			break;
+		case WHITE_QUEEN:
+			entity = entity = sceneManager->createEntity("queen.mesh");
+			break;
+		case WHITE_KING:
+			entity = entity = sceneManager->createEntity("king.mesh");
+			break;
+		default:
+			break;
+		}
+		entity->setMaterial(piece < 6 ? whiteMaterialPtr : blackMaterialPtr);
+		sceneNode = sceneManager->getRootSceneNode()->createChildSceneNode(std::to_string(piece));
+		sceneNode->setPosition(-2, 0, 0);
+		sceneNode->attachObject(entity);
+		Piece p = { piece, entity, sceneNode };
+		piecesMap.insert(std::pair<PIECE_ENUM, Piece>(piece, p));
+	}
+	sceneNode->setPosition(X_START + x * SQUARE_WIDTH * 2, 0 + BOARD_THICKNESS, Y_START - y * SQUARE_HEIGHT * 2);
 }
