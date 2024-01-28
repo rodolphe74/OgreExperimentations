@@ -149,16 +149,17 @@ int main()
 
 	Ogre::MaterialPtr shaderMaterial = Ogre::MaterialManager::getSingleton().getByName("FlatFragment");
 	Ogre::MaterialPtr monochromeOrderedDitherMaterial = Ogre::MaterialManager::getSingleton().getByName("MonochromeOrderedFragment");
+	Ogre::MaterialPtr darkMonochromeOrderedDitherMaterial = Ogre::MaterialManager::getSingleton().getByName("DarkMonochromeOrderedFragment");
 
 	rookEntity = sceneManager->createEntity("king.mesh");
-	rookEntity->setMaterial(monochromeOrderedDitherMaterial);
-	rookNode = sceneManager->getRootSceneNode()->createChildSceneNode("Rook");
+	rookEntity->setMaterial(darkMonochromeOrderedDitherMaterial);
+	rookNode = sceneManager->getRootSceneNode()->createChildSceneNode("DitheredKing");
 	rookNode->setPosition(-1, 2, 10);
 	rookNode->attachObject(rookEntity);
 
 	rookEntityTwo = sceneManager->createEntity("queen.mesh");
 	rookEntityTwo->setMaterial(monochromeOrderedDitherMaterial);
-	rookNodeTwo = sceneManager->getRootSceneNode()->createChildSceneNode("RookTwo");
+	rookNodeTwo = sceneManager->getRootSceneNode()->createChildSceneNode("DitheredQueen");
 	rookNodeTwo->setPosition(1, 2, 10);
 	rookNodeTwo->attachObject(rookEntityTwo);
 
@@ -178,17 +179,17 @@ int main()
 	knightNode->setPosition(0, 2, 0);
 	knightNode->attachObject(knight);
 
-	Ogre::Entity *queen = sceneManager->createEntity("queen.mesh");
-	queen->setMaterial(blauMaterial);
-	Ogre::SceneNode *queenNode = sceneManager->getRootSceneNode()->createChildSceneNode("queen");
-	queenNode->setPosition(2, 2, 0);
-	queenNode->attachObject(queen);
+	Ogre::Entity *rookOne = sceneManager->createEntity("rook.mesh");
+	rookOne->setMaterial(blauMaterial);
+	Ogre::SceneNode *rookOneNode = sceneManager->getRootSceneNode()->createChildSceneNode("rookOne");
+	rookOneNode->setPosition(2, 2, 0);
+	rookOneNode->attachObject(rookOne);
 
-	Ogre::Entity *king = sceneManager->createEntity("king.mesh");
-	king->setMaterial(blauMaterial);
-	Ogre::SceneNode *kingNode = sceneManager->getRootSceneNode()->createChildSceneNode("king");
-	kingNode->setPosition(4, 2, 0);
-	kingNode->attachObject(king);
+	Ogre::Entity *rookTwo = sceneManager->createEntity("rook.mesh");
+	rookTwo->setMaterial(gelbMaterial);
+	Ogre::SceneNode *rookTwoNode = sceneManager->getRootSceneNode()->createChildSceneNode("rookTwo");
+	rookTwoNode->setPosition(4, 2, 0);
+	rookTwoNode->attachObject(rookTwo);
 
 	Ogre::Entity *pawn = sceneManager->createEntity("pawn.mesh");
 	pawn->setMaterial(gelbMaterial);

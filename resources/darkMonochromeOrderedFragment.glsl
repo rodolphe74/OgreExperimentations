@@ -6,7 +6,7 @@ varying vec4 lightPositionF;
 varying vec3 cameraPositionF;
 
 const vec3 ambiant = vec3(.0f, .0f, .0f);
-const float darkening = 0.0f;
+const float darkening = 0.8f;
 
 
 vec3 hsl2rgb( in vec3 c )

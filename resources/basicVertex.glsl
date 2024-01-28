@@ -13,6 +13,7 @@ varying vec3 normalPositionF;
 varying vec4 lightPositionF;
 varying vec3 cameraPositionF;
 
+
 void main()
 {
 	vec4 viewModelPosition = worldViewProj * vertex;
@@ -23,6 +24,7 @@ void main()
 
 	lightPositionF = lightPosition;
 	cameraPositionF = cameraPosition;
+
 
 	gl_Position = viewModelPosition;
 }
