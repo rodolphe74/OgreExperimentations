@@ -1,3 +1,5 @@
+#version 150 core
+
 uniform vec4 lightPosition;
 uniform vec3 cameraPosition;
 uniform mat4 worldViewProj;

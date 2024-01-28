@@ -147,23 +147,26 @@ int main()
 	//rookNode->attachObject(rookEntity);
 	//rookNode->pitch(Ogre::Degree(-90));
 
+	Ogre::MaterialPtr shaderMaterial = Ogre::MaterialManager::getSingleton().getByName("FlatFragment");
+	Ogre::MaterialPtr monochromeOrderedDitherMaterial = Ogre::MaterialManager::getSingleton().getByName("MonochromeOrderedFragment");
 
 	rookEntity = sceneManager->createEntity("rook.mesh");
-	Ogre::MaterialPtr shaderMaterial = Ogre::MaterialManager::getSingleton().getByName("FlatFragment");
 	rookEntity->setMaterial(shaderMaterial);
 	rookNode = sceneManager->getRootSceneNode()->createChildSceneNode("Rook");
 	rookNode->setPosition(-1, 2, 10);
 	rookNode->attachObject(rookEntity);
 
 	rookEntityTwo = sceneManager->createEntity("rook.mesh");
-	Ogre::MaterialPtr blauMaterial = Ogre::MaterialManager::getSingleton().getByName("Blau");
-	rookEntityTwo->setMaterial(blauMaterial);
+	rookEntityTwo->setMaterial(monochromeOrderedDitherMaterial);
 	rookNodeTwo = sceneManager->getRootSceneNode()->createChildSceneNode("RookTwo");
 	rookNodeTwo->setPosition(1, 2, 10);
 	rookNodeTwo->attachObject(rookEntityTwo);
 
-	Ogre::Entity *bishop = sceneManager->createEntity("bishop.mesh");
+	
 	Ogre::MaterialPtr gelbMaterial = Ogre::MaterialManager::getSingleton().getByName("Gelb");
+	Ogre::MaterialPtr blauMaterial = Ogre::MaterialManager::getSingleton().getByName("Blau");
+
+	Ogre::Entity *bishop = sceneManager->createEntity("bishop.mesh");
 	bishop->setMaterial(gelbMaterial);
 	Ogre::SceneNode *bishopNode = sceneManager->getRootSceneNode()->createChildSceneNode("bishop");
 	bishopNode->setPosition(-2, 2, 0);

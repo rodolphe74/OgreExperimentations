@@ -1,3 +1,5 @@
+#version 150 core
+
 varying vec3 viewPositionF;
 varying vec3 normalPositionF;
 varying vec4 lightPositionF;
