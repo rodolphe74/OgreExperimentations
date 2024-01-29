@@ -19,22 +19,85 @@
 int tick = 0;
 int waitedFrames = 0;
 float angleIncrement = 0;
+float zoom = 0;
+const float ZOOM_INCREMENT = 1.0f;
+float yaw = 0, pitch = 0;;
+const float YAW_INCREMENT = .5f;
 
 Ogre::Entity *rookEntity;
 Ogre::Entity *rookEntityTwo;
 Ogre::SceneNode *rookNode;
 Ogre::SceneNode *rookNodeTwo;
-
+Ogre::SceneNode *camNode;
 
 
 
 class KeyHandler : public OgreBites::InputListener
 {
+	int leftMouseButtonPressed = 0;
+	int pressX = 0, pressY = 0;
+	uint32_t width, height;
+
+	public:
+	KeyHandler(uint32_t w, uint32_t h) : width(w), height(h) {};
+
 	bool keyPressed(const OgreBites::KeyboardEvent &evt) override
 	{
 		if (evt.keysym.sym == OgreBites::SDLK_ESCAPE)
 		{
 			Ogre::Root::getSingleton().queueEndRendering();
+		}
+		return true;
+	}
+
+	bool mouseWheelRolled(const OgreBites::MouseWheelEvent& evt) {
+		if (evt.y == -1) {
+			zoom += ZOOM_INCREMENT;
+		} else if (evt.y == 1) {
+			zoom -= ZOOM_INCREMENT;
+		}
+		return true;
+	}
+
+	virtual bool mousePressed(const OgreBites::MouseButtonEvent& evt) {
+		if (evt.button == 1) {
+			leftMouseButtonPressed = 1;
+			pressX = evt.x;
+			pressY = evt.y;
+		}
+		return true;
+	}
+
+    virtual bool mouseReleased(const OgreBites::MouseButtonEvent& evt) {
+		if (evt.button == 1) {
+			leftMouseButtonPressed = 0;
+			yaw = 0;
+			pitch = 0;
+		}
+		return true;
+	}
+	
+	virtual bool mouseMoved(const OgreBites::MouseMotionEvent& evt) { 
+		if (leftMouseButtonPressed) {
+			if (evt.x > pressX) {
+				float speed = (pressX - evt.x) / 1000.f;
+				std::cout << "yaw++  speed:" << speed <<  std::endl;
+				yaw = speed;
+			} else {
+				float speed = (evt.x - pressX) / 1000.f;
+				std::cout << "yaw--  speed:" << speed << std::endl;
+				yaw = -speed;
+			} 
+
+			if (evt.y > pressY) {
+				float speed = (pressY - evt.y) / 1000.f;
+				std::cout << "yaw++  speed:" << speed <<  std::endl;
+				pitch = speed;
+			} else {
+				float speed = (evt.y - pressY) / 1000.f;
+				std::cout << "yaw--  speed:" << speed << std::endl;
+				pitch = -speed;
+			}
 		}
 		return true;
 	}
@@ -45,16 +108,15 @@ class RookFrameListener : public Ogre::FrameListener
 {
 private:
 	Ogre::SceneManager *sceneManager;
+	uint32_t width, height;
 
 public:
-	RookFrameListener(Ogre::SceneManager &sm)
-		:sceneManager(&sm) {};
+	RookFrameListener(Ogre::SceneManager &sm, uint32_t w, uint32_t h)
+		:sceneManager(&sm), width(w), height(h) {};
 
 	bool frameStarted(const Ogre::FrameEvent &evt)
 	{
-
 		angleIncrement+=.01f;
-
 		rookNode->setPosition(
 			-1 + std::cos(angleIncrement) * RADIUS, 
 			rookNode->getPosition()[1], 
@@ -64,6 +126,17 @@ public:
 		1 - std::cos(angleIncrement) * RADIUS, 
 		rookNodeTwo->getPosition()[1], 
 		10 - std::sin(angleIncrement) * RADIUS);
+
+		// refresh cam
+		// std::cout << "zoom:" << zoom << std::endl;
+		camNode->setPosition(camNode->getPosition()[0], camNode->getPosition()[1], camNode->getPosition()[2] + zoom);
+		zoom = 0;
+
+		if (yaw > 0.1f || yaw < -0.1f)
+			camNode->yaw(Ogre::Degree(yaw));
+		
+		if (pitch > 0.1f || pitch < -0.1f)
+			camNode->pitch(Ogre::Degree(pitch));
 
 		return true;
 	}
@@ -90,7 +163,7 @@ int main()
 	Ogre::Root *root = ctx.getRoot();
 	Ogre::SceneManager *sceneManager = root->createSceneManager();
 
-	RookFrameListener *physFrameListener = new RookFrameListener(/*physics, */*sceneManager);
+	RookFrameListener *physFrameListener = new RookFrameListener(*sceneManager, ctx.getRenderWindow()->getWidth(), ctx.getRenderWindow()->getHeight());
 	root->addFrameListener(physFrameListener);
 
 	// Shader init
@@ -105,7 +178,7 @@ int main()
 	lightNode->setPosition(20, 80, 50);
 
 	// create the camera
-	Ogre::SceneNode *camNode = sceneManager->getRootSceneNode()->createChildSceneNode();
+	camNode = sceneManager->getRootSceneNode()->createChildSceneNode();
 	Ogre::Camera *cam = sceneManager->createCamera("myCam");
 	cam->setNearClipDistance(Ogre::Real(0.1));
 	cam->setFarClipDistance(FAR_CLIP);
@@ -117,6 +190,7 @@ int main()
 	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
 	camNode->setPosition(0, 6, 26);
 	ctx.getRenderWindow()->addViewport(cam);
+	// std::cout << " W= " << ctx.getRenderWindow()->getWidth() << std::endl;
 
 
 	// create a plane
@@ -136,6 +210,7 @@ int main()
 	Ogre::MaterialPtr shaderMaterial = Ogre::MaterialManager::getSingleton().getByName("FlatFragment");
 	Ogre::MaterialPtr monochromeOrderedDitherMaterial = Ogre::MaterialManager::getSingleton().getByName("MonochromeOrderedFragment");
 	Ogre::MaterialPtr darkMonochromeOrderedDitherMaterial = Ogre::MaterialManager::getSingleton().getByName("DarkMonochromeOrderedFragment");
+	Ogre::MaterialPtr blackMonochromeOrderedDitherMaterial = Ogre::MaterialManager::getSingleton().getByName("BlackMonochromeOrderedFragment");
 
 	rookEntity = sceneManager->createEntity("king.mesh");
 	rookEntity->setMaterial(darkMonochromeOrderedDitherMaterial);
@@ -153,37 +228,37 @@ int main()
 	Ogre::MaterialPtr gelbMaterial = Ogre::MaterialManager::getSingleton().getByName("Gelb");
 	Ogre::MaterialPtr blauMaterial = Ogre::MaterialManager::getSingleton().getByName("Blau");
 
-	Ogre::Entity *bishop = sceneManager->createEntity("bishop.mesh");
-	bishop->setMaterial(gelbMaterial);
-	Ogre::SceneNode *bishopNode = sceneManager->getRootSceneNode()->createChildSceneNode("bishop");
-	bishopNode->setPosition(-2, 0, 0);
-	bishopNode->attachObject(bishop);
+	// Ogre::Entity *bishop = sceneManager->createEntity("bishop.mesh");
+	// bishop->setMaterial(gelbMaterial);
+	// Ogre::SceneNode *bishopNode = sceneManager->getRootSceneNode()->createChildSceneNode("bishop");
+	// bishopNode->setPosition(-2, 0, 0);
+	// bishopNode->attachObject(bishop);
 
-	Ogre::Entity *knight = sceneManager->createEntity("knight.mesh");
-	knight->setMaterial(gelbMaterial);
-	Ogre::SceneNode *knightNode = sceneManager->getRootSceneNode()->createChildSceneNode("knight");
-	knightNode->setPosition(0, 0, 0);
-	knightNode->attachObject(knight);
+	// Ogre::Entity *knight = sceneManager->createEntity("knight.mesh");
+	// knight->setMaterial(gelbMaterial);
+	// Ogre::SceneNode *knightNode = sceneManager->getRootSceneNode()->createChildSceneNode("knight");
+	// knightNode->setPosition(0, 0, 0);
+	// knightNode->attachObject(knight);
 
-	Ogre::Entity *rookOne = sceneManager->createEntity("rook.mesh");
-	rookOne->setMaterial(blauMaterial);
-	Ogre::SceneNode *rookOneNode = sceneManager->getRootSceneNode()->createChildSceneNode("rookOne");
-	rookOneNode->setPosition(2, 0, 0);
-	rookOneNode->attachObject(rookOne);
+	// Ogre::Entity *rookOne = sceneManager->createEntity("rook.mesh");
+	// rookOne->setMaterial(blauMaterial);
+	// Ogre::SceneNode *rookOneNode = sceneManager->getRootSceneNode()->createChildSceneNode("rookOne");
+	// rookOneNode->setPosition(2, 0, 0);
+	// rookOneNode->attachObject(rookOne);
 
-	Ogre::Entity *rookTwo = sceneManager->createEntity("rook.mesh");
-	rookTwo->setMaterial(gelbMaterial);
-	Ogre::SceneNode *rookTwoNode = sceneManager->getRootSceneNode()->createChildSceneNode("rookTwo");
-	rookTwoNode->setPosition(4, 0, 0);
-	rookTwoNode->attachObject(rookTwo);
+	// Ogre::Entity *rookTwo = sceneManager->createEntity("rook.mesh");
+	// rookTwo->setMaterial(gelbMaterial);
+	// Ogre::SceneNode *rookTwoNode = sceneManager->getRootSceneNode()->createChildSceneNode("rookTwo");
+	// rookTwoNode->setPosition(4, 0, 0);
+	// rookTwoNode->attachObject(rookTwo);
 
 	Ogre::Entity *pawn = sceneManager->createEntity("pawn.mesh");
 	pawn->setMaterial(gelbMaterial);
 	Ogre::SceneNode *pawnNode = sceneManager->getRootSceneNode()->createChildSceneNode("pawn");
-	pawnNode->setPosition(6, 0, 0);
+	pawnNode->setPosition(X_CENTER, 0, Y_CENTER);
 	pawnNode->attachObject(pawn);
 
-    createBoard(sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
+    createBoard(sceneManager, monochromeOrderedDitherMaterial, blackMonochromeOrderedDitherMaterial);
 	setPieceOnBoard(WHITE_ROOK, 0, 0, sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
 	setPieceOnBoard(BLACK_KNIGHT, 1, 0, sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
 	setPieceOnBoard(BLACK_BISHOP, 2, 0, sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
@@ -193,7 +268,7 @@ int main()
 	sceneManager->setSkyBox(true, "TrippySkyBox", 100, false);
 
 	// keys
-	KeyHandler keyHandler;
+	KeyHandler keyHandler(ctx.getRenderWindow()->getWidth(), ctx.getRenderWindow()->getHeight());
 	ctx.addInputListener(&keyHandler);
 
 	// Ogre loop
@@ -205,7 +280,7 @@ int main()
 	return 0;
 }
 
-void createBoard(Ogre::SceneManager *sceneManager, Ogre::MaterialPtr &monochromeOrderedDitherMaterial, Ogre::MaterialPtr &darkMonochromeOrderedDitherMaterial)
+void createBoard(Ogre::SceneManager *sceneManager, Ogre::MaterialPtr &whiteMaterialPtr, Ogre::MaterialPtr &blackMaterialPtr)
 {
     bool black = true;
 
@@ -217,9 +292,9 @@ void createBoard(Ogre::SceneManager *sceneManager, Ogre::MaterialPtr &monochrome
             Ogre::Entity *square = sceneManager->createEntity("cube.mesh");
 
             if (!black)
-                square->setMaterial(monochromeOrderedDitherMaterial);
+                square->setMaterial(whiteMaterialPtr);
             else
-                square->setMaterial(darkMonochromeOrderedDitherMaterial);
+                square->setMaterial(blackMaterialPtr);
             black = !black;
 
             Ogre::SceneNode *squareNode = sceneManager->getRootSceneNode()->createChildSceneNode(nodeName);

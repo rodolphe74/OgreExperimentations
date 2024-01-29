@@ -6,8 +6,8 @@ varying vec4 lightPositionF;
 varying vec3 cameraPositionF;
 
 const vec3 ambiant = vec3(.0f, .0f, .0f);
-const float darkening = 0.8f;
-const int sz = 4;
+const float darkening = 0.9f;
+const int sz = 6;
 const float dv = 9.0f;
 
 // https://github.com/ImageMagick/ImageMagick/blob/be0f61a0d4ca4852a29cf08f74e7790803d649ac/config/thresholds.xml#L132
@@ -88,8 +88,8 @@ float indexValue()
 {
     int x = int(mod(gl_FragCoord.x, sz));
     int y = int(mod(gl_FragCoord.y, sz));
-	return indexMatrix4x4d9[(x + y * sz)] / dv;
-	// return indexMatrix6x6d9[(x + y * sz)] / dv;
+	// return indexMatrix4x4d9[(x + y * sz)] / dv;
+	return indexMatrix6x6d9[(x + y * sz)] / dv;
 	// return indexMatrix8x8d9[(x + y * sz)] / dv;
 }
 

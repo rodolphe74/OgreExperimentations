@@ -26,10 +26,11 @@ endif(MSVC)
 # === rook ===
 
 if(UNIX)
+execute_process(COMMAND bash -c "${CMAKE_CURRENT_SOURCE_DIR}/copyres.sh ${CMAKE_CURRENT_SOURCE_DIR}")
 endif(UNIX)
 
 if (MSVC)
-execute_process(COMMAND powershell -ExecutionPolicy Bypass -File copyres.ps1 )
+execute_process(COMMAND powershell -ExecutionPolicy Bypass -File copyres.ps1)
 endif(MSVC)
 
 add_executable(rook Rook.cpp)

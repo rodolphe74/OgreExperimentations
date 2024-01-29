@@ -163,7 +163,7 @@ void addRandomCubeToTheScene(Physics &physics, Ogre::SceneManager& sceneManager,
 		int s = std::rand() % 50 + 21;
 		float sf = s / 100.0f;
 
-		Ogre::Entity* cubeEntity = sceneManager.createEntity("Cube.mesh");
+		Ogre::Entity* cubeEntity = sceneManager.createEntity("cube.mesh");
 		std::string nodeName = "cubeNode" + std::to_string(currentTick);
 		Ogre::SceneNode* cubeNode = sceneManager.getRootSceneNode()->createChildSceneNode(nodeName);
 		cubeNode->setPosition(Ogre::Real(x), 15, 0);
