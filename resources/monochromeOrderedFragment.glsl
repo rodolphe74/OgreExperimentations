@@ -7,6 +7,33 @@ varying vec3 cameraPositionF;
 
 const vec3 ambiant = vec3(.0f, .0f, .0f);
 const float darkening = 0.0f;
+const int sz = 4;
+const float dv = 9.0f;
+
+// https://github.com/ImageMagick/ImageMagick/blob/be0f61a0d4ca4852a29cf08f74e7790803d649ac/config/thresholds.xml#L132
+const int indexMatrix4x4d9[16] = int[](
+	4,  2,  7,  5,
+	3,  1,  8,  6,
+	7,  5,  4,  2,
+	8,  6,  3,  1);
+
+const int indexMatrix6x6d9[36] = int[](
+	14, 13, 10,  8,  2,  3,
+	16, 18, 12,  7,  1,  4,
+	15, 17, 11,  9,  6,  5,
+	8,  2,  3, 14, 13, 10,
+	7,  1,  4, 16, 18, 12,
+	9,  6,  5, 15, 17, 11);
+
+const int indexMatrix8x8d9[64] = int[](
+	13,  7,  8, 14, 17, 21, 22, 18,
+	6,  1,  3,  9, 28, 31, 29, 23,
+	5,  2,  4, 10, 27, 32, 30, 24,
+	16, 12, 11, 15, 20, 26, 25, 19,
+	17, 21, 22, 18, 13,  7,  8, 14,
+	28, 31, 29, 23,  6,  1,  3,  9,
+	27, 32, 30, 24,  5,  2,  4, 10,
+	20, 26, 25, 19, 16, 12, 11, 15);
 
 
 vec3 hsl2rgb( in vec3 c )
@@ -56,11 +83,14 @@ const int indexMatrix4x4[16] = int[](
 	3,  11, 1,  9,
 	15, 7,  13, 5);
 
+
 float indexValue()
 {
-    int x = int(mod(gl_FragCoord.x, 4));
-    int y = int(mod(gl_FragCoord.y, 4));
-    return indexMatrix4x4[(x + y * 4)] / 16.0;
+    int x = int(mod(gl_FragCoord.x, sz));
+    int y = int(mod(gl_FragCoord.y, sz));
+	return indexMatrix4x4d9[(x + y * sz)] / dv;
+	// return indexMatrix6x6d9[(x + y * sz)] / dv;
+	// return indexMatrix8x8d9[(x + y * sz)] / dv;
 }
 
 float dither(float color)
@@ -68,7 +98,7 @@ float dither(float color)
 	// http://alex-charlton.com/posts/Dithering_on_the_GPU/
     float closestColor = (color < 0.5) ? 0 : 1;
     float secondClosestColor = 1 - closestColor;
-    float d = indexValue();
+	float d = indexValue();
     float distance = abs(closestColor - color);
     return (distance < d) ? closestColor : secondClosestColor;
 }
