@@ -10,6 +10,8 @@ find_package(OGRE REQUIRED COMPONENTS Bites CONFIG)
 find_package(Bullet REQUIRED)
 include_directories(${BULLET_INCLUDE_DIR})
 
+# === rigidSimul ===
+
 add_executable(rigidSimul RigidSimul.cpp)
 
 if(UNIX)
@@ -20,6 +22,15 @@ if(MSVC)
 target_link_libraries(rigidSimul OgreBites ${BULLET_LIBRARIES})
 endif(MSVC)
 
+
+# === rook ===
+
+if(UNIX)
+endif(UNIX)
+
+if (MSVC)
+execute_process(COMMAND powershell -ExecutionPolicy Bypass -File copyres.ps1 )
+endif(MSVC)
 
 add_executable(rook Rook.cpp)
 

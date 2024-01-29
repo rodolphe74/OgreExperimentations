@@ -239,7 +239,7 @@ void setPieceOnBoard(PIECE_ENUM piece, int x, int y, Ogre::SceneManager *sceneMa
 		sceneNode = p.node;
 	}
 	else {
-		Ogre::Entity *entity;
+		Ogre::Entity *entity = nullptr;
 		switch (piece)
 		{
 		case BLACK_ROOK:
