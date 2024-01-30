@@ -1,5 +1,7 @@
 #pragma once
 
+#define M_PI 3.14159265358979323846
+
 // Globals
 constexpr int OBJECT_LIFE_TIME = 300;
 constexpr int WAIT_FRAMES = 0;
@@ -9,12 +11,13 @@ constexpr int REFRESH_RATE = 75;
 constexpr float BOARD_THICKNESS = .2f;
 constexpr float SQUARE_WIDTH = 2.0f;
 constexpr float SQUARE_HEIGHT = 2.0f;
-constexpr int X_START = -13;
+constexpr int X_START = -14;
 constexpr int Y_START = 0;
 // constexpr int X_CENTER = (X_START + 2.0f * 8) / 2.0f;
 // constexpr int Y_CENTER = (Y_START - 2.0f * 8) / 2.0f;
-constexpr float X_CENTER = 1.5f;
+constexpr float X_CENTER = 0.0f;
 constexpr float Y_CENTER = -14.0f;
+
 
 int tick = 0;
 int waitedFrames = 0;
@@ -24,9 +27,16 @@ const float ZOOM_INCREMENT = 1.0f;
 const float ZOOM_MAX = 35.0f;
 const float ZOOM_MIN = 20.0f;
 const float CAM_HEIGHT = 6.0f;
+const float Y_ROTATION_MAX = 1.72f;
+const float Y_ROTATION_MIN = 0.04f;
 float CAM_X_RADIUS = 35.0f;
-float xRotation = 0.0f;
+float CAM_Y_RADIUS = 35.0f;
+// float xRotation = 0.0f;
+// float yRotation = M_PI/2;
 float X_ROTATION_INCREMENT = .05f;
+float Y_ROTATION_INCREMENT = .05f;
+
+Ogre::Vector3 LOOK_AT_POINT = Ogre::Vector3(X_CENTER, CAM_HEIGHT, Y_CENTER);
 
 Ogre::Entity *rookEntity;
 Ogre::Entity *rookEntityTwo;

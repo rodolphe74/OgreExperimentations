@@ -12,19 +12,143 @@
 #pragma warning( disable : 26495 )
 #endif // _WINDOWS
 
-void adaptCamera()
+void rotateAroundLookAtPoint(bool x, float increment)
 {
-	Ogre::Vector3 cp = camNode->getPosition();
-	Ogre::Vector3 lap = Ogre::Vector3(X_CENTER, CAM_HEIGHT, Y_CENTER);
-	Ogre::Vector3 dir = lap - cp;
+	Ogre::Vector3 camPosition = camNode->getPosition();
+	std::cout << "camPosition:" << camPosition << " - " <<   camNode->convertWorldToLocalPosition(camPosition) <<  std::endl;
 
-	std::cout << cp << " " << lap << " " << dir << std::endl;
+	Ogre::Vector3 originTranslation = Ogre::Vector3(0, 0, 0) - LOOK_AT_POINT;
+	std::cout << "originTranslation:" << originTranslation << std::endl;
 
-	//camNode->setDirection(dir);
-	camNode->lookAt(lap, Ogre::Node::TS_WORLD);
+	camPosition = camPosition + originTranslation;
+
+	std::cout << "translated cam position:" << camPosition << std::endl;
+
+	// camNode->convertWorldToLocalDirection
+
+	if (x) {
+		Ogre::Quaternion xRotQ(Ogre::Radian(increment), Ogre::Vector3::UNIT_Y);
+		Ogre::Matrix4 xRotM(xRotQ);
+		Ogre::Vector4f xRotC(camPosition[0], camPosition[1], camPosition[2], 1);
+		Ogre::Vector4f xRotNC = xRotM * xRotC;
+		camNode->setPosition(xRotNC[0] - originTranslation[0], xRotNC[1] - originTranslation[1], xRotNC[2] - originTranslation[2]);
+	}
+	else {
+		Ogre::Quaternion yRotQ(Ogre::Radian(increment), Ogre::Vector3::UNIT_X);
+		Ogre::Matrix4 yRotM(yRotQ);
+		Ogre::Vector4f yRotC(camPosition[0], camPosition[1], camPosition[2], 1);
+		Ogre::Vector4f yRotNC = yRotM * yRotC;
+		camNode->setPosition(yRotNC[0] - originTranslation[0], yRotNC[1] - originTranslation[1], yRotNC[2] - originTranslation[2]);
+	}
+
+	// camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
 	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-	camNode->setPosition(X_CENTER + std::cos(xRotation) * CAM_X_RADIUS, CAM_HEIGHT, Y_CENTER + std::sin(xRotation) * CAM_X_RADIUS);
+	camNode->lookAt(LOOK_AT_POINT, Ogre::Node::TS_WORLD);
 }
+
+
+// void rotateAroundLookAtPoint(bool x, float increment)
+// {
+// 	Ogre::Vector3 camPosition = camNode->getPosition();
+// 	std::cout << "camPosition:" << camPosition << " - " <<   camNode->convertWorldToLocalPosition(camPosition) <<  std::endl;
+
+// 	Ogre::Vector3 lookAtPointInCameraSpace = camNode->convertWorldToLocalPosition(LOOK_AT_POINT);
+// 	std::cout << "lookAtCam:" << lookAtPointInCameraSpace <<  std::endl;
+
+
+// 	Ogre::Vector3 originTranslation = Ogre::Vector3(0, 0, 0) - lookAtPointInCameraSpace;
+// 	std::cout << "originTranslation:" << originTranslation << std::endl;
+
+// 	camPosition = camPosition + originTranslation;
+
+// 	std::cout << "translated cam position:" << camPosition << std::endl;
+
+// 	camNode->lookAt(Ogre::Vector3(0, 0, 0), Ogre::Node::TS_WORLD);
+
+// 	if (x) {
+// 		Ogre::Quaternion xRotQ(Ogre::Radian(increment), Ogre::Vector3::UNIT_Y);
+// 		Ogre::Matrix4 xRotM(xRotQ);
+// 		Ogre::Vector4f xRotC(camPosition[0], camPosition[1], camPosition[2], 1);
+// 		Ogre::Vector4f xRotNC = xRotM * xRotC;
+// 		camNode->setPosition(xRotNC[0] - originTranslation[0], xRotNC[1] - originTranslation[1], xRotNC[2] - originTranslation[2]);
+// 	}
+// 	else {
+// 		Ogre::Quaternion xRotQ(Ogre::Radian(increment), Ogre::Vector3::UNIT_X);
+// 		Ogre::Matrix4 xRotM(xRotQ);
+// 		Ogre::Vector4f xRotC(camPosition[0], camPosition[1], camPosition[2], 1);
+// 		Ogre::Vector4f xRotNC = xRotM * xRotC;
+// 		camNode->setPosition(xRotNC[0] - originTranslation[0], xRotNC[1] - originTranslation[1], xRotNC[2] - originTranslation[2]);
+// 	}
+
+// 	// camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
+// 	camNode->lookAt(LOOK_AT_POINT, Ogre::Node::TS_WORLD);
+// }
+
+
+
+// void adaptCamera()
+// {
+// 	Ogre::Vector3 camPosition = camNode->getPosition();
+// 	std::cout << "camPosition:" << camPosition << std::endl;
+
+// 	Ogre::Vector3 lap = Ogre::Vector3(X_CENTER, CAM_HEIGHT, Y_CENTER);
+// 	camNode->lookAt(lap, Ogre::Node::TS_WORLD);
+// 	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
+
+
+// 	Ogre::Vector3 originTranslation =  Ogre::Vector3(0, 0, 0) - lap;
+// 	std::cout << "originTranslation:" << originTranslation << std::endl;
+
+// 	camPosition = camPosition + originTranslation;
+
+// 	std::cout << "translated cam position:" << camPosition << std::endl;
+
+// 	Ogre::Quaternion xRotQ(Ogre::Radian(X_ROTATION_INCREMENT), Ogre::Vector3::UNIT_Y);
+// 	Ogre::Matrix4 xRotM(xRotQ);
+// 	Ogre::Vector4f xRotC(camPosition[0], camPosition[1], camPosition[2], 1);
+// 	Ogre::Vector4f xRotNC = xRotM * xRotC;
+// 	// Ogre::Vector3 newCamPosition(xRotC[0] - originTranslation[0], xRotC[1] - originTranslation[1], xRotC[2] - originTranslation[2]);
+// 	camNode->setPosition(xRotNC[0] - originTranslation[0], xRotNC[1] - originTranslation[1], xRotNC[2] - originTranslation[2]);
+
+// 	/*
+// 	Ogre::Vector3 ocp = camNode->getPosition();
+// 	camNode->setPosition(-X_CENTER, CAM_HEIGHT, -Y_CENTER);
+// 	Ogre::Vector3 cp = camNode->getPosition();
+
+// 	Ogre::Vector3 tr = cp - ocp;
+// 	std::cout << ocp << cp << tr << std::endl;
+	
+// 	// X
+// 	Ogre::Quaternion xRotQ(Ogre::Radian(xRotation), Ogre::Vector3::UNIT_Y);
+// 	Ogre::Matrix4 xRotM(xRotQ);
+// 	Ogre::Matrix4 xRotT;
+// 	// xRotT.makeTrans(X_CENTER, 0, Y_CENTER);
+// 	// std::cout << xRotT << std::endl;
+// 	// Ogre::Matrix4 xRotTI;
+// 	// xRotTI.makeTrans(-X_CENTER, 0, -Y_CENTER);
+
+// 	std::cout << xRotM << std::endl;
+// 	Ogre::Vector4f xRotC(cp[0], cp[1], cp[2], 1);
+// 	std::cout << xRotM * xRotC << std::endl;
+// 	Ogre::Vector4f xRotNC = xRotM * xRotC;
+// 	camNode->setPosition(xRotNC[0], xRotNC[1], xRotNC[2]);
+
+// 	Ogre::Vector3 ncp = camNode->getPosition();
+// 	camNode->setPosition(ncp[0] + X_CENTER, CAM_HEIGHT, ncp[2] + Y_CENTER);
+
+// 	// X-AXIS
+// 	//camNode->setPosition(X_CENTER + std::cos(xRotation) * CAM_X_RADIUS, CAM_HEIGHT, Y_CENTER + std::sin(xRotation) * CAM_X_RADIUS);
+
+// 	// Y-AXIS
+// 	// Ogre::Vector3 cp = camNode->getPosition();
+// 	// camNode->setPosition(cp[0], cp[1] + std::cos(yRotation) * CAM_Y_RADIUS, cp[2] + std::sin(yRotation) * CAM_Y_RADIUS);
+// 	// camNode->setPosition(X_CENTER, CAM_HEIGHT + std::cos(yRotation) * CAM_Y_RADIUS, Y_CENTER + std::sin(yRotation) * CAM_Y_RADIUS);
+
+// 	Ogre::Vector3 lap = Ogre::Vector3(X_CENTER, CAM_HEIGHT, Y_CENTER);
+// 	camNode->lookAt(lap, Ogre::Node::TS_WORLD);
+// 	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
+// 	*/
+// }
 
 
 class KeyHandler : public OgreBites::InputListener
@@ -37,12 +161,8 @@ class KeyHandler : public OgreBites::InputListener
 	KeyHandler(uint32_t w, uint32_t h) : width(w), height(h) {};
 
 
-
-
-
 	bool keyPressed(const OgreBites::KeyboardEvent &evt) override
 	{
-		adaptCamera();
 
 		if (evt.keysym.sym == OgreBites::SDLK_ESCAPE)
 		{
@@ -51,15 +171,29 @@ class KeyHandler : public OgreBites::InputListener
 
 		if (evt.keysym.sym == OgreBites::SDLK_LEFT)
 		{
-			xRotation += X_ROTATION_INCREMENT;
+			// xRotation += X_ROTATION_INCREMENT;
+			// std::cout << "xRotation:" << xRotation << " yRotation:" << yRotation << std::endl;
+			rotateAroundLookAtPoint(true, X_ROTATION_INCREMENT);
 		}
 
 		if (evt.keysym.sym == OgreBites::SDLK_RIGHT)
 		{
-			xRotation -= X_ROTATION_INCREMENT;
+			// xRotation -= X_ROTATION_INCREMENT;
+			// std::cout << "xRotation:" << xRotation << " yRotation:" << yRotation << std::endl;
+			rotateAroundLookAtPoint(true, -X_ROTATION_INCREMENT);
 		}
 
-		std::cout << "xRotation:" << xRotation << std::endl;
+		if (evt.keysym.sym == OgreBites::SDLK_DOWN)
+		{
+			rotateAroundLookAtPoint(false, Y_ROTATION_INCREMENT);
+		}
+
+		if (evt.keysym.sym == OgreBites::SDLK_UP)
+		{
+			rotateAroundLookAtPoint(false, -Y_ROTATION_INCREMENT);
+		}
+
+		
 
 		return true;
 	}
@@ -72,7 +206,7 @@ class KeyHandler : public OgreBites::InputListener
 			CAM_X_RADIUS -= ZOOM_INCREMENT;
 		}
 		std::cout << "zoom:" << CAM_X_RADIUS << std::endl;
-		adaptCamera();
+		// adaptCamera();
 		return true;
 	}
 
@@ -212,11 +346,12 @@ int main()
 	//Ogre::Vector3 cp = camNode->getPosition();
 	//Ogre::Vector3 lap = Ogre::Vector3(0, 0, 0);
 	//Ogre::Vector3 dir = lap - cp;
-	//camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-	//camNode->setPosition(0, 6, 26);
+	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
+	camNode->setPosition(0, 6, 26);
 
-	camNode->setPosition(36, 6, -14);
-	adaptCamera();
+	// camNode->setPosition(36, 6, -14);
+	camNode->lookAt(LOOK_AT_POINT, Ogre::Node::TS_WORLD);
+	// adaptCamera();
 	ctx.getRenderWindow()->addViewport(cam);
 	// std::cout << " W= " << ctx.getRenderWindow()->getWidth() << std::endl;
 
