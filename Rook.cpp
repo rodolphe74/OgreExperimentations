@@ -12,24 +12,19 @@
 #pragma warning( disable : 26495 )
 #endif // _WINDOWS
 
+void adaptCamera()
+{
+	Ogre::Vector3 cp = camNode->getPosition();
+	Ogre::Vector3 lap = Ogre::Vector3(X_CENTER, CAM_HEIGHT, Y_CENTER);
+	Ogre::Vector3 dir = lap - cp;
 
+	std::cout << cp << " " << lap << " " << dir << std::endl;
 
-
-
-int tick = 0;
-int waitedFrames = 0;
-float angleIncrement = 0;
-float zoom = 0;
-const float ZOOM_INCREMENT = 1.0f;
-float yaw = 0, pitch = 0;;
-const float YAW_INCREMENT = .5f;
-
-Ogre::Entity *rookEntity;
-Ogre::Entity *rookEntityTwo;
-Ogre::SceneNode *rookNode;
-Ogre::SceneNode *rookNodeTwo;
-Ogre::SceneNode *camNode;
-
+	//camNode->setDirection(dir);
+	camNode->lookAt(lap, Ogre::Node::TS_WORLD);
+	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
+	camNode->setPosition(X_CENTER + std::cos(xRotation) * CAM_X_RADIUS, CAM_HEIGHT, Y_CENTER + std::sin(xRotation) * CAM_X_RADIUS);
+}
 
 
 class KeyHandler : public OgreBites::InputListener
@@ -41,21 +36,43 @@ class KeyHandler : public OgreBites::InputListener
 	public:
 	KeyHandler(uint32_t w, uint32_t h) : width(w), height(h) {};
 
+
+
+
+
 	bool keyPressed(const OgreBites::KeyboardEvent &evt) override
 	{
+		adaptCamera();
+
 		if (evt.keysym.sym == OgreBites::SDLK_ESCAPE)
 		{
 			Ogre::Root::getSingleton().queueEndRendering();
 		}
+
+		if (evt.keysym.sym == OgreBites::SDLK_LEFT)
+		{
+			xRotation += X_ROTATION_INCREMENT;
+		}
+
+		if (evt.keysym.sym == OgreBites::SDLK_RIGHT)
+		{
+			xRotation -= X_ROTATION_INCREMENT;
+		}
+
+		std::cout << "xRotation:" << xRotation << std::endl;
+
 		return true;
 	}
 
+
 	bool mouseWheelRolled(const OgreBites::MouseWheelEvent& evt) {
-		if (evt.y == -1) {
-			zoom += ZOOM_INCREMENT;
-		} else if (evt.y == 1) {
-			zoom -= ZOOM_INCREMENT;
+		if (evt.y == -1 && CAM_X_RADIUS < ZOOM_MAX) {
+			CAM_X_RADIUS += ZOOM_INCREMENT;
+		} else if (evt.y == 1 && CAM_X_RADIUS > ZOOM_MIN) {
+			CAM_X_RADIUS -= ZOOM_INCREMENT;
 		}
+		std::cout << "zoom:" << CAM_X_RADIUS << std::endl;
+		adaptCamera();
 		return true;
 	}
 
@@ -71,8 +88,6 @@ class KeyHandler : public OgreBites::InputListener
     virtual bool mouseReleased(const OgreBites::MouseButtonEvent& evt) {
 		if (evt.button == 1) {
 			leftMouseButtonPressed = 0;
-			yaw = 0;
-			pitch = 0;
 		}
 		return true;
 	}
@@ -80,23 +95,21 @@ class KeyHandler : public OgreBites::InputListener
 	virtual bool mouseMoved(const OgreBites::MouseMotionEvent& evt) { 
 		if (leftMouseButtonPressed) {
 			if (evt.x > pressX) {
-				float speed = (pressX - evt.x) / 1000.f;
-				std::cout << "yaw++  speed:" << speed <<  std::endl;
-				yaw = speed;
-			} else {
-				float speed = (evt.x - pressX) / 1000.f;
-				std::cout << "yaw--  speed:" << speed << std::endl;
-				yaw = -speed;
+				//float speed = (pressX - evt.x) / 1000.f;
+				//xRotation += X_ROTATION_INCREMENT;
+				return true;
+			} 
+			
+			if (evt.x < pressX) {
+				// float speed = (evt.x - pressX) / 1000.f;
+				//xRotation -= X_ROTATION_INCREMENT;
+				return true;
 			} 
 
 			if (evt.y > pressY) {
-				float speed = (pressY - evt.y) / 1000.f;
-				std::cout << "yaw++  speed:" << speed <<  std::endl;
-				pitch = speed;
+				//float speed = (pressY - evt.y) / 1000.f;
 			} else {
-				float speed = (evt.y - pressY) / 1000.f;
-				std::cout << "yaw--  speed:" << speed << std::endl;
-				pitch = -speed;
+				//float speed = (evt.y - pressY) / 1000.f;
 			}
 		}
 		return true;
@@ -116,27 +129,37 @@ public:
 
 	bool frameStarted(const Ogre::FrameEvent &evt)
 	{
-		angleIncrement+=.01f;
+		dancersAngleIncrement+=.01f;
 		rookNode->setPosition(
-			-1 + std::cos(angleIncrement) * RADIUS, 
+			-1 + std::cos(dancersAngleIncrement) * RADIUS, 
 			rookNode->getPosition()[1], 
-			10 + std::sin(angleIncrement) * RADIUS);
+			10 + std::sin(dancersAngleIncrement) * RADIUS);
 
 		rookNodeTwo->setPosition(
-		1 - std::cos(angleIncrement) * RADIUS, 
+		1 - std::cos(dancersAngleIncrement) * RADIUS, 
 		rookNodeTwo->getPosition()[1], 
-		10 - std::sin(angleIncrement) * RADIUS);
+		10 - std::sin(dancersAngleIncrement) * RADIUS);
 
 		// refresh cam
 		// std::cout << "zoom:" << zoom << std::endl;
-		camNode->setPosition(camNode->getPosition()[0], camNode->getPosition()[1], camNode->getPosition()[2] + zoom);
-		zoom = 0;
+		//camNode->setPosition(camNode->getPosition()[0], camNode->getPosition()[1], camNode->getPosition()[2] + zoom);
+		/*zoom = 0;*/
 
-		if (yaw > 0.1f || yaw < -0.1f)
-			camNode->yaw(Ogre::Degree(yaw));
-		
-		if (pitch > 0.1f || pitch < -0.1f)
-			camNode->pitch(Ogre::Degree(pitch));
+		//if (yaw > 0.1f || yaw < -0.1f)
+		//	camNode->yaw(Ogre::Degree(yaw));
+		//
+		//if (pitch > 0.1f || pitch < -0.1f)
+		//	camNode->pitch(Ogre::Degree(pitch));
+
+
+		//Ogre::Vector3 cp = camNode->getPosition();
+		//Ogre::Vector3 lap = Ogre::Vector3(X_CENTER, cp[1], Y_CENTER);
+		//Ogre::Vector3 dir = lap - cp;
+
+		//camNode->setDirection(dir);
+		//camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
+		//camNode->setPosition(X_CENTER + std::cos(xRotation) * zoom, cp[1], Y_CENTER + std::sin(xRotation) * zoom);
+		//zoom = 0;
 
 		return true;
 	}
@@ -144,6 +167,7 @@ public:
 	bool frameEnded(const Ogre::FrameEvent &evt)
 	{
 		tick++;
+		//xRotation += X_ROTATION_INCREMENT;
 		return true;
 	}
 };
@@ -184,11 +208,15 @@ int main()
 	cam->setFarClipDistance(FAR_CLIP);
 	cam->setAutoAspectRatio(true);
 	camNode->attachObject(cam);
-	Ogre::Vector3 cp = camNode->getPosition();
-	Ogre::Vector3 lap = Ogre::Vector3(0, 0, 0);
-	Ogre::Vector3 dir = lap - cp;
-	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-	camNode->setPosition(0, 6, 26);
+	
+	//Ogre::Vector3 cp = camNode->getPosition();
+	//Ogre::Vector3 lap = Ogre::Vector3(0, 0, 0);
+	//Ogre::Vector3 dir = lap - cp;
+	//camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
+	//camNode->setPosition(0, 6, 26);
+
+	camNode->setPosition(36, 6, -14);
+	adaptCamera();
 	ctx.getRenderWindow()->addViewport(cam);
 	// std::cout << " W= " << ctx.getRenderWindow()->getWidth() << std::endl;
 
@@ -228,30 +256,6 @@ int main()
 	Ogre::MaterialPtr gelbMaterial = Ogre::MaterialManager::getSingleton().getByName("Gelb");
 	Ogre::MaterialPtr blauMaterial = Ogre::MaterialManager::getSingleton().getByName("Blau");
 
-	// Ogre::Entity *bishop = sceneManager->createEntity("bishop.mesh");
-	// bishop->setMaterial(gelbMaterial);
-	// Ogre::SceneNode *bishopNode = sceneManager->getRootSceneNode()->createChildSceneNode("bishop");
-	// bishopNode->setPosition(-2, 0, 0);
-	// bishopNode->attachObject(bishop);
-
-	// Ogre::Entity *knight = sceneManager->createEntity("knight.mesh");
-	// knight->setMaterial(gelbMaterial);
-	// Ogre::SceneNode *knightNode = sceneManager->getRootSceneNode()->createChildSceneNode("knight");
-	// knightNode->setPosition(0, 0, 0);
-	// knightNode->attachObject(knight);
-
-	// Ogre::Entity *rookOne = sceneManager->createEntity("rook.mesh");
-	// rookOne->setMaterial(blauMaterial);
-	// Ogre::SceneNode *rookOneNode = sceneManager->getRootSceneNode()->createChildSceneNode("rookOne");
-	// rookOneNode->setPosition(2, 0, 0);
-	// rookOneNode->attachObject(rookOne);
-
-	// Ogre::Entity *rookTwo = sceneManager->createEntity("rook.mesh");
-	// rookTwo->setMaterial(gelbMaterial);
-	// Ogre::SceneNode *rookTwoNode = sceneManager->getRootSceneNode()->createChildSceneNode("rookTwo");
-	// rookTwoNode->setPosition(4, 0, 0);
-	// rookTwoNode->attachObject(rookTwo);
-
 	Ogre::Entity *pawn = sceneManager->createEntity("pawn.mesh");
 	pawn->setMaterial(gelbMaterial);
 	Ogre::SceneNode *pawnNode = sceneManager->getRootSceneNode()->createChildSceneNode("pawn");
@@ -262,7 +266,6 @@ int main()
 	setPieceOnBoard(WHITE_ROOK, 0, 0, sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
 	setPieceOnBoard(BLACK_KNIGHT, 1, 0, sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
 	setPieceOnBoard(BLACK_BISHOP, 2, 0, sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
-
 
     // sky
 	sceneManager->setSkyBox(true, "TrippySkyBox", 100, false);

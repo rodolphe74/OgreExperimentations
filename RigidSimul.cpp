@@ -26,7 +26,7 @@ constexpr int REFRESH_RATE = 75.0f;
 
 int tick = 0;
 int waitedFrames = 0;
-float angleIncrement = 0;
+float dancersAngleIncrement = 0;
 
 
 struct BodyParameters {
@@ -233,14 +233,14 @@ public:
 			}
 		}
 
-		angleIncrement+=.005f;
+		dancersAngleIncrement+=.005f;
 		Ogre::Vector3 cp = physics->camera->getPosition();
 		Ogre::Vector3 lap = Ogre::Vector3(0, 0, 0);
 		Ogre::Vector3 dir = lap - cp;
 		
 		physics->camera->setDirection(dir);
 		physics->camera->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-		physics->camera->setPosition(std::cos(angleIncrement) * RADIUS, cp[1], std::sin(angleIncrement) * RADIUS);
+		physics->camera->setPosition(std::cos(dancersAngleIncrement) * RADIUS, cp[1], std::sin(dancersAngleIncrement) * RADIUS);
 		return true;
 	}
 
@@ -296,7 +296,7 @@ int main()
 	Ogre::Vector3 lap = Ogre::Vector3(0, 0, 0);
 	Ogre::Vector3 dir = lap - cp;
 	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-	camNode->setPosition(std::cos(angleIncrement) * RADIUS, CAM_Y, std::sin(angleIncrement) * RADIUS);
+	camNode->setPosition(std::cos(dancersAngleIncrement) * RADIUS, CAM_Y, std::sin(dancersAngleIncrement) * RADIUS);
 	physics.camera = camNode;
 
 	// and tell it to render into the main window
