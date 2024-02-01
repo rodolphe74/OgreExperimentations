@@ -48,16 +48,19 @@ Ogre::SceneNode *kingNode;
 Ogre::SceneNode *queenNodeTwo;
 Ogre::SceneNode *camNode;
 Ogre::Camera *cam;
+Ogre::Plane plane(Ogre::Vector3::UNIT_Y, 0);
 
 enum PIECE_ENUM { 
 	WHITE_PAWN = 0, WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING,
-	BLACK_PAWN, BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING
+	BLACK_PAWN, BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING,
+	EMPTY_SQUARE, UNKNOWN
 };
 
 struct PieceStruct {
 	PIECE_ENUM piece;
 	Ogre::Entity *entity;
 	Ogre::SceneNode *node;
+	int x, y;
 };
 typedef PieceStruct Piece;
 

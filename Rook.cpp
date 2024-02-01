@@ -82,11 +82,71 @@ void rotateAroundLookAtPointThenTranslateZ()
 
 class KeyHandler : public OgreBites::InputListener
 {
+	private:
 	int leftMouseButtonPressed = 0;
 	int pressX = 0, pressY = 0;
 	uint32_t width, height;
 	Ogre::SceneManager *sceneManager;
 	Ogre::RaySceneQuery *raySceneQuery;
+	Piece selectedPiece = { UNKNOWN, nullptr, nullptr };
+
+    Piece selectPiece(int x, int y)
+    {
+        // default selection code
+        Ogre::Ray mouseRay = cam->getCameraToViewportRay(x / float(width), y / float(height));
+        raySceneQuery->setRay(mouseRay);
+        raySceneQuery->setSortByDistance(true);
+        Ogre::RaySceneQueryResult rsqr = raySceneQuery->execute();
+        if (rsqr.size() > 0) {
+            Ogre::RaySceneQueryResult::iterator itr;
+            // Get results
+            for (itr = rsqr.begin(); itr != rsqr.end(); itr++) {
+                if (itr->movable) {
+                    Ogre::Entity *pointedEntity = sceneManager->getEntity(itr->movable->getName());
+                    if (pointedEntity) {
+                        std::string nodeName = pointedEntity->getParentSceneNode()->getName();
+						if (nodeName.substr(0, 3) == "_P_") {
+							int pieceNumber =  atoi(nodeName.substr(3,1).c_str());
+							std::cout << pieceNumber << std::endl;
+							return piecesMap.at((PIECE_ENUM) pieceNumber);
+                        }
+                    }
+                }
+            }
+        } // ~selection code
+		return { UNKNOWN, nullptr, nullptr };
+    }
+
+	Piece selectSquare(int x, int y)
+	{
+        // default selection code
+        Ogre::Ray mouseRay = cam->getCameraToViewportRay(x / float(width), y / float(height));
+        raySceneQuery->setRay(mouseRay);
+        raySceneQuery->setSortByDistance(true);
+        Ogre::RaySceneQueryResult rsqr = raySceneQuery->execute();
+        if (rsqr.size() > 0) {
+            Ogre::RaySceneQueryResult::iterator itr;
+            // Get results
+            for (itr = rsqr.begin(); itr != rsqr.end(); itr++) {
+                if (itr->movable) {
+                    Ogre::Entity *pointedEntity = sceneManager->getEntity(itr->movable->getName());
+                    if (pointedEntity) {
+                        std::string nodeName = pointedEntity->getParentSceneNode()->getName();
+                        if (nodeName.substr(0, 3) == "_S_") {
+							std::string squareName = nodeName.substr(3, 2);
+							int x = squareName.substr(0, 1).c_str()[0] - 'a';
+							int y = atoi(squareName.substr(1, 1).c_str()) - 1;
+							// std::cout << "squareName:" << squareName << " at " << x << "," << y << std::endl;
+							Piece piece = { EMPTY_SQUARE, pointedEntity, (Ogre::SceneNode *) pointedEntity->getParentNode(), x, y };
+							return piece;
+                        }
+                    }
+                }
+            }
+        } // ~selection code
+		return { UNKNOWN, nullptr, nullptr };
+    }
+
 
 	public:
 		KeyHandler(Ogre::SceneManager &sm, Ogre::RaySceneQuery &rsq, uint32_t w, uint32_t h) 
@@ -144,6 +204,16 @@ class KeyHandler : public OgreBites::InputListener
 
 	virtual bool mousePressed(const OgreBites::MouseButtonEvent& evt) {
 		if (evt.button == 1) {
+
+			Piece piece = selectPiece(evt.x, evt.y);
+			if (piece.piece != UNKNOWN && piece.piece != EMPTY_SQUARE) {
+				// selected piece
+				// piece.entity->setMaterialName("Gelb");
+				selectedPiece = piece;
+			} else {
+				selectedPiece = { UNKNOWN, nullptr, nullptr };
+			}
+
 			leftMouseButtonPressed = 1;
 			pressX = evt.x;
 			pressY = evt.y;
@@ -154,20 +224,39 @@ class KeyHandler : public OgreBites::InputListener
     virtual bool mouseReleased(const OgreBites::MouseButtonEvent& evt) {
 		if (evt.button == 1) {
 			leftMouseButtonPressed = 0;
+
+			if (selectedPiece.piece != UNKNOWN) {
+				Piece arrival = selectSquare(evt.x, evt.y);
+				std::cout << "vous avez laché la piece " << selectedPiece.piece << " sur " << arrival.x << "," << arrival.y << std::endl;
+			}
+
+			selectedPiece = { UNKNOWN, nullptr, nullptr };
 		}
 		return true;
 	}
 	
 	virtual bool mouseMoved(const OgreBites::MouseMotionEvent& evt) { 
 		if (leftMouseButtonPressed) {
+
+			if (selectedPiece.piece != UNKNOWN) {
+				std::cout << "vous bougez la selection " << selectedPiece.piece << " depuis " << selectedPiece.x << "," << selectedPiece.y << std::endl;
+				Ogre::Ray mouseRay = cam->getCameraToViewportRay(evt.x / float(width), evt.y / float(height));
+        		Ogre::RayTestResult rtr = mouseRay.intersects(plane);
+				std::cout << rtr.first << "=" << rtr.second << std::endl;
+				Ogre::Vector3 grabbedPieceCoordinates = mouseRay.getPoint(rtr.second);
+				std::cout << grabbedPieceCoordinates << std::endl;
+				selectedPiece.node->setPosition(grabbedPieceCoordinates);
+				return true;
+			}
+
 			if (evt.x > pressX) {
 				xRotation -= X_ROTATION_INCREMENT;
 				rotateAroundLookAtPointThenTranslateZ();
 				pressX = evt.x;
 				pressY = evt.y;
 				return true;
-			} 
-			
+			}
+
 			if (evt.x < pressX) {
 				xRotation += X_ROTATION_INCREMENT;
 				rotateAroundLookAtPointThenTranslateZ();
@@ -193,33 +282,8 @@ class KeyHandler : public OgreBites::InputListener
 			}
 		}
 
-		// default selection code
-		Ogre::Ray mouseRay = cam->getCameraToViewportRay(evt.x / float(width), evt.y / float(height));
-		raySceneQuery->setRay(mouseRay);
-		raySceneQuery->setSortByDistance(true);
-		Ogre::RaySceneQueryResult rsqr = raySceneQuery->execute();
-		if (rsqr.size() > 0) {
-			Ogre::RaySceneQueryResult::iterator itr;
-			// Get results
-			for (itr = rsqr.begin(); itr != rsqr.end(); itr++) {
-				if (itr->movable) {
-					Ogre::Entity *pointedEntity = sceneManager->getEntity(itr->movable->getName());
-					if (pointedEntity) {
-						std::string nodeName = pointedEntity->getParentSceneNode()->getName();
-						if (nodeName.substr(0, 3) == "_S_") {
-							pointedEntity->setMaterialName("Blau");
-						}
-						else if (nodeName.substr(0, 3) == "_P_") {
-							pointedEntity->setMaterialName("Gelb");
-						}
-					}
-					break;
-				}
-			}
-		} // ~selection code
-
-		return true;
-	}
+        return true;
+    }
 };
 
 
@@ -252,7 +316,6 @@ public:
 	bool frameEnded(const Ogre::FrameEvent &evt)
 	{
 		tick++;
-		//xRotation += X_ROTATION_INCREMENT;
 		return true;
 	}
 };
@@ -304,7 +367,6 @@ int main()
 
 
 	// create a plane
-	Ogre::Plane plane(Ogre::Vector3::UNIT_Y, 0);
 	Ogre::MeshPtr planePtr = Ogre::MeshManager::getSingleton().createPlane("ground",
 		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, plane,
 		1500, 1500, 20, 20, true, 1, 5, 5, Ogre::Vector3::UNIT_Z);
@@ -368,10 +430,8 @@ void createBoard(Ogre::SceneManager *sceneManager, Ogre::MaterialPtr &whiteMater
 {
     bool black = true;
 
-    for (int y = 0; y < 8; y++)
-    {
-        for (int x = 0; x < 8; x++)
-        {
+    for (int y = 0; y < 8; y++) {
+        for (int x = 0; x < 8; x++) {
             std::string nodeName =  std::string("_S_").append(std::string(1, 'a' + x).append(std::to_string(y + 1)));
             Ogre::Entity *square = sceneManager->createEntity("cube.mesh");
 
@@ -439,7 +499,7 @@ void setPieceOnBoard(PIECE_ENUM piece, int x, int y, Ogre::SceneManager *sceneMa
 		sceneNode->setPosition(-2, 0, 0);
 		sceneNode->attachObject(entity);
 		
-		Piece p = { piece, entity, sceneNode };
+		Piece p = { piece, entity, sceneNode, x, y };
 		piecesMap.insert(std::pair<PIECE_ENUM, Piece>(piece, p));
 	}
 	sceneNode->setPosition(X_START + x * SQUARE_WIDTH * 2, 0 + BOARD_THICKNESS, Y_START - y * SQUARE_HEIGHT * 2);
