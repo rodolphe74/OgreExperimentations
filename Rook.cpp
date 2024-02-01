@@ -12,143 +12,72 @@
 #pragma warning( disable : 26495 )
 #endif // _WINDOWS
 
-void rotateAroundLookAtPoint(bool x, float increment)
+
+
+Ogre::Vector3 ArbitraryRotate(Ogre::Vector3 p, Ogre::Real theta, Ogre::Vector3 p1, Ogre::Vector3 p2)
 {
-	Ogre::Vector3 camPosition = camNode->getPosition();
-	std::cout << "camPosition:" << camPosition << " - " <<   camNode->convertWorldToLocalPosition(camPosition) <<  std::endl;
+	// Rotate a point p by angle theta around an arbitrary line segment p1-p2
+	// Return the rotated point.
+	// Positive angles are anticlockwise looking down the axis
+	// towards the origin.
+	// Assume right hand coordinate system.
+	// https://paulbourke.net/geometry/rotate/
 
-	Ogre::Vector3 originTranslation = Ogre::Vector3(0, 0, 0) - LOOK_AT_POINT;
-	std::cout << "originTranslation:" << originTranslation << std::endl;
+	Ogre::Vector3 q(0.0, 0.0, 0.0);
+	Ogre::Real costheta, sintheta;
+	Ogre::Vector3 r;
 
-	camPosition = camPosition + originTranslation;
+	r.x = p2.x - p1.x;
+	r.y = p2.y - p1.y;
+	r.z = p2.z - p1.z;
+	p.x -= p1.x;
+	p.y -= p1.y;
+	p.z -= p1.z;
+	r.normalise();
 
-	std::cout << "translated cam position:" << camPosition << std::endl;
+	costheta = std::cos(theta);
+	sintheta = std::sin(theta);
 
-	// camNode->convertWorldToLocalDirection
+	q.x += (costheta + (1 - costheta) * r.x * r.x) * p.x;
+	q.x += ((1 - costheta) * r.x * r.y - r.z * sintheta) * p.y;
+	q.x += ((1 - costheta) * r.x * r.z + r.y * sintheta) * p.z;
 
-	if (x) {
-		Ogre::Quaternion xRotQ(Ogre::Radian(increment), Ogre::Vector3::UNIT_Y);
-		Ogre::Matrix4 xRotM(xRotQ);
-		Ogre::Vector4f xRotC(camPosition[0], camPosition[1], camPosition[2], 1);
-		Ogre::Vector4f xRotNC = xRotM * xRotC;
-		camNode->setPosition(xRotNC[0] - originTranslation[0], xRotNC[1] - originTranslation[1], xRotNC[2] - originTranslation[2]);
-	}
-	else {
-		Ogre::Quaternion yRotQ(Ogre::Radian(increment), Ogre::Vector3::UNIT_X);
-		Ogre::Matrix4 yRotM(yRotQ);
-		Ogre::Vector4f yRotC(camPosition[0], camPosition[1], camPosition[2], 1);
-		Ogre::Vector4f yRotNC = yRotM * yRotC;
-		camNode->setPosition(yRotNC[0] - originTranslation[0], yRotNC[1] - originTranslation[1], yRotNC[2] - originTranslation[2]);
-	}
+	q.y += ((1 - costheta) * r.x * r.y + r.z * sintheta) * p.x;
+	q.y += (costheta + (1 - costheta) * r.y * r.y) * p.y;
+	q.y += ((1 - costheta) * r.y * r.z - r.x * sintheta) * p.z;
 
-	// camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-	camNode->lookAt(LOOK_AT_POINT, Ogre::Node::TS_WORLD);
+	q.z += ((1 - costheta) * r.x * r.z - r.y * sintheta) * p.x;
+	q.z += ((1 - costheta) * r.y * r.z + r.x * sintheta) * p.y;
+	q.z += (costheta + (1 - costheta) * r.z * r.z) * p.z;
+
+	q.x += p1.x;
+	q.y += p1.y;
+	q.z += p1.z;
+	return(q);
 }
 
 
-// void rotateAroundLookAtPoint(bool x, float increment)
-// {
-// 	Ogre::Vector3 camPosition = camNode->getPosition();
-// 	std::cout << "camPosition:" << camPosition << " - " <<   camNode->convertWorldToLocalPosition(camPosition) <<  std::endl;
+void rotateAroundLookAtPointThenTranslateZ()
+{
+	Ogre::Vector3 camPosition = CAM_POSITION - LOOK_AT_POINT;
 
-// 	Ogre::Vector3 lookAtPointInCameraSpace = camNode->convertWorldToLocalPosition(LOOK_AT_POINT);
-// 	std::cout << "lookAtCam:" << lookAtPointInCameraSpace <<  std::endl;
+	// Rotate X
+	camPosition = ArbitraryRotate(camPosition, Ogre::Real(xRotation), Ogre::Vector3(0, 0, 0), Ogre::Vector3::UNIT_Y);
 
+	// Rotate Y in new frame
+	Ogre::Vector3 frameX = ArbitraryRotate(Ogre::Vector3::UNIT_X, Ogre::Real(xRotation), Ogre::Vector3(0, 0, 0), Ogre::Vector3::UNIT_Y);
+	camPosition = ArbitraryRotate(camPosition, Ogre::Real(yRotation), Ogre::Vector3(0, 0, 0), frameX);
 
-// 	Ogre::Vector3 originTranslation = Ogre::Vector3(0, 0, 0) - lookAtPointInCameraSpace;
-// 	std::cout << "originTranslation:" << originTranslation << std::endl;
+	camNode->setPosition(camPosition + LOOK_AT_POINT);
+	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
 
-// 	camPosition = camPosition + originTranslation;
+	// translate Z in new frame
+	Ogre::Vector3 cameraZ = LOOK_AT_POINT - camNode->getPosition();
+	cameraZ.normalise();
+	camNode->translate(cameraZ * zTranslate, Ogre::Node::TS_WORLD);
 
-// 	std::cout << "translated cam position:" << camPosition << std::endl;
-
-// 	camNode->lookAt(Ogre::Vector3(0, 0, 0), Ogre::Node::TS_WORLD);
-
-// 	if (x) {
-// 		Ogre::Quaternion xRotQ(Ogre::Radian(increment), Ogre::Vector3::UNIT_Y);
-// 		Ogre::Matrix4 xRotM(xRotQ);
-// 		Ogre::Vector4f xRotC(camPosition[0], camPosition[1], camPosition[2], 1);
-// 		Ogre::Vector4f xRotNC = xRotM * xRotC;
-// 		camNode->setPosition(xRotNC[0] - originTranslation[0], xRotNC[1] - originTranslation[1], xRotNC[2] - originTranslation[2]);
-// 	}
-// 	else {
-// 		Ogre::Quaternion xRotQ(Ogre::Radian(increment), Ogre::Vector3::UNIT_X);
-// 		Ogre::Matrix4 xRotM(xRotQ);
-// 		Ogre::Vector4f xRotC(camPosition[0], camPosition[1], camPosition[2], 1);
-// 		Ogre::Vector4f xRotNC = xRotM * xRotC;
-// 		camNode->setPosition(xRotNC[0] - originTranslation[0], xRotNC[1] - originTranslation[1], xRotNC[2] - originTranslation[2]);
-// 	}
-
-// 	// camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-// 	camNode->lookAt(LOOK_AT_POINT, Ogre::Node::TS_WORLD);
-// }
-
-
-
-// void adaptCamera()
-// {
-// 	Ogre::Vector3 camPosition = camNode->getPosition();
-// 	std::cout << "camPosition:" << camPosition << std::endl;
-
-// 	Ogre::Vector3 lap = Ogre::Vector3(X_CENTER, CAM_HEIGHT, Y_CENTER);
-// 	camNode->lookAt(lap, Ogre::Node::TS_WORLD);
-// 	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-
-
-// 	Ogre::Vector3 originTranslation =  Ogre::Vector3(0, 0, 0) - lap;
-// 	std::cout << "originTranslation:" << originTranslation << std::endl;
-
-// 	camPosition = camPosition + originTranslation;
-
-// 	std::cout << "translated cam position:" << camPosition << std::endl;
-
-// 	Ogre::Quaternion xRotQ(Ogre::Radian(X_ROTATION_INCREMENT), Ogre::Vector3::UNIT_Y);
-// 	Ogre::Matrix4 xRotM(xRotQ);
-// 	Ogre::Vector4f xRotC(camPosition[0], camPosition[1], camPosition[2], 1);
-// 	Ogre::Vector4f xRotNC = xRotM * xRotC;
-// 	// Ogre::Vector3 newCamPosition(xRotC[0] - originTranslation[0], xRotC[1] - originTranslation[1], xRotC[2] - originTranslation[2]);
-// 	camNode->setPosition(xRotNC[0] - originTranslation[0], xRotNC[1] - originTranslation[1], xRotNC[2] - originTranslation[2]);
-
-// 	/*
-// 	Ogre::Vector3 ocp = camNode->getPosition();
-// 	camNode->setPosition(-X_CENTER, CAM_HEIGHT, -Y_CENTER);
-// 	Ogre::Vector3 cp = camNode->getPosition();
-
-// 	Ogre::Vector3 tr = cp - ocp;
-// 	std::cout << ocp << cp << tr << std::endl;
-	
-// 	// X
-// 	Ogre::Quaternion xRotQ(Ogre::Radian(xRotation), Ogre::Vector3::UNIT_Y);
-// 	Ogre::Matrix4 xRotM(xRotQ);
-// 	Ogre::Matrix4 xRotT;
-// 	// xRotT.makeTrans(X_CENTER, 0, Y_CENTER);
-// 	// std::cout << xRotT << std::endl;
-// 	// Ogre::Matrix4 xRotTI;
-// 	// xRotTI.makeTrans(-X_CENTER, 0, -Y_CENTER);
-
-// 	std::cout << xRotM << std::endl;
-// 	Ogre::Vector4f xRotC(cp[0], cp[1], cp[2], 1);
-// 	std::cout << xRotM * xRotC << std::endl;
-// 	Ogre::Vector4f xRotNC = xRotM * xRotC;
-// 	camNode->setPosition(xRotNC[0], xRotNC[1], xRotNC[2]);
-
-// 	Ogre::Vector3 ncp = camNode->getPosition();
-// 	camNode->setPosition(ncp[0] + X_CENTER, CAM_HEIGHT, ncp[2] + Y_CENTER);
-
-// 	// X-AXIS
-// 	//camNode->setPosition(X_CENTER + std::cos(xRotation) * CAM_X_RADIUS, CAM_HEIGHT, Y_CENTER + std::sin(xRotation) * CAM_X_RADIUS);
-
-// 	// Y-AXIS
-// 	// Ogre::Vector3 cp = camNode->getPosition();
-// 	// camNode->setPosition(cp[0], cp[1] + std::cos(yRotation) * CAM_Y_RADIUS, cp[2] + std::sin(yRotation) * CAM_Y_RADIUS);
-// 	// camNode->setPosition(X_CENTER, CAM_HEIGHT + std::cos(yRotation) * CAM_Y_RADIUS, Y_CENTER + std::sin(yRotation) * CAM_Y_RADIUS);
-
-// 	Ogre::Vector3 lap = Ogre::Vector3(X_CENTER, CAM_HEIGHT, Y_CENTER);
-// 	camNode->lookAt(lap, Ogre::Node::TS_WORLD);
-// 	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-// 	*/
-// }
+	camNode->lookAt(LOOK_AT_POINT, Ogre::Node::TS_WORLD);
+}
 
 
 class KeyHandler : public OgreBites::InputListener
@@ -156,57 +85,60 @@ class KeyHandler : public OgreBites::InputListener
 	int leftMouseButtonPressed = 0;
 	int pressX = 0, pressY = 0;
 	uint32_t width, height;
+	Ogre::SceneManager *sceneManager;
+	Ogre::RaySceneQuery *raySceneQuery;
 
 	public:
-	KeyHandler(uint32_t w, uint32_t h) : width(w), height(h) {};
-
+		KeyHandler(Ogre::SceneManager &sm, Ogre::RaySceneQuery &rsq, uint32_t w, uint32_t h) 
+			: sceneManager(&sm), raySceneQuery(&rsq), width(w), height(h) {};
 
 	bool keyPressed(const OgreBites::KeyboardEvent &evt) override
 	{
-
-		if (evt.keysym.sym == OgreBites::SDLK_ESCAPE)
-		{
+		switch (evt.keysym.sym) {
+		case OgreBites::SDLK_ESCAPE:
 			Ogre::Root::getSingleton().queueEndRendering();
-		}
+			break;
+		case OgreBites::SDLK_LEFT:
+			xRotation -= X_ROTATION_INCREMENT;
+			rotateAroundLookAtPointThenTranslateZ();
+			break;
+		case OgreBites::SDLK_RIGHT:
+			xRotation += X_ROTATION_INCREMENT;
+			rotateAroundLookAtPointThenTranslateZ();
+			break;
+		case OgreBites::SDLK_DOWN:
+			yRotation += Y_ROTATION_INCREMENT;
+			rotateAroundLookAtPointThenTranslateZ();
+			break;
+		case OgreBites::SDLK_UP:
+			yRotation -= Y_ROTATION_INCREMENT;
+			rotateAroundLookAtPointThenTranslateZ();
+			break;
+		case 'p':
+			zTranslate = (zTranslate < ZOOM_MAX ? ++zTranslate : zTranslate);
+			rotateAroundLookAtPointThenTranslateZ();
+			break;
+		case 'o':
+			zTranslate = (zTranslate > ZOOM_MIN ? --zTranslate : zTranslate);
+			rotateAroundLookAtPointThenTranslateZ();
+			break;
 
-		if (evt.keysym.sym == OgreBites::SDLK_LEFT)
-		{
-			// xRotation += X_ROTATION_INCREMENT;
-			// std::cout << "xRotation:" << xRotation << " yRotation:" << yRotation << std::endl;
-			rotateAroundLookAtPoint(true, X_ROTATION_INCREMENT);
-		}
-
-		if (evt.keysym.sym == OgreBites::SDLK_RIGHT)
-		{
-			// xRotation -= X_ROTATION_INCREMENT;
-			// std::cout << "xRotation:" << xRotation << " yRotation:" << yRotation << std::endl;
-			rotateAroundLookAtPoint(true, -X_ROTATION_INCREMENT);
-		}
-
-		if (evt.keysym.sym == OgreBites::SDLK_DOWN)
-		{
-			rotateAroundLookAtPoint(false, Y_ROTATION_INCREMENT);
-		}
-
-		if (evt.keysym.sym == OgreBites::SDLK_UP)
-		{
-			rotateAroundLookAtPoint(false, -Y_ROTATION_INCREMENT);
+		default:
+			break;
 		}
 
 		
-
 		return true;
 	}
 
-
 	bool mouseWheelRolled(const OgreBites::MouseWheelEvent& evt) {
-		if (evt.y == -1 && CAM_X_RADIUS < ZOOM_MAX) {
-			CAM_X_RADIUS += ZOOM_INCREMENT;
-		} else if (evt.y == 1 && CAM_X_RADIUS > ZOOM_MIN) {
-			CAM_X_RADIUS -= ZOOM_INCREMENT;
+		if (evt.y == -1) {
+			zTranslate = (zTranslate > ZOOM_MIN ? --zTranslate : zTranslate);
+			rotateAroundLookAtPointThenTranslateZ();
+		} else if (evt.y == 1) {
+			zTranslate = (zTranslate < ZOOM_MAX ? ++zTranslate : zTranslate);
+			rotateAroundLookAtPointThenTranslateZ();
 		}
-		std::cout << "zoom:" << CAM_X_RADIUS << std::endl;
-		// adaptCamera();
 		return true;
 	}
 
@@ -229,23 +161,63 @@ class KeyHandler : public OgreBites::InputListener
 	virtual bool mouseMoved(const OgreBites::MouseMotionEvent& evt) { 
 		if (leftMouseButtonPressed) {
 			if (evt.x > pressX) {
-				//float speed = (pressX - evt.x) / 1000.f;
-				//xRotation += X_ROTATION_INCREMENT;
+				xRotation -= X_ROTATION_INCREMENT;
+				rotateAroundLookAtPointThenTranslateZ();
+				pressX = evt.x;
+				pressY = evt.y;
 				return true;
 			} 
 			
 			if (evt.x < pressX) {
-				// float speed = (evt.x - pressX) / 1000.f;
-				//xRotation -= X_ROTATION_INCREMENT;
+				xRotation += X_ROTATION_INCREMENT;
+				rotateAroundLookAtPointThenTranslateZ();
+				pressX = evt.x;
+				pressY = evt.y;
 				return true;
 			} 
 
 			if (evt.y > pressY) {
-				//float speed = (pressY - evt.y) / 1000.f;
-			} else {
-				//float speed = (evt.y - pressY) / 1000.f;
+				yRotation -= Y_ROTATION_INCREMENT;
+				rotateAroundLookAtPointThenTranslateZ();
+				pressX = evt.x;
+				pressY = evt.y;
+				return true;
+			}
+
+			if (evt.y < pressY) {
+				yRotation += Y_ROTATION_INCREMENT;
+				rotateAroundLookAtPointThenTranslateZ();
+				pressX = evt.x;
+				pressY = evt.y;
+				return true;
 			}
 		}
+
+		// default selection code
+		Ogre::Ray mouseRay = cam->getCameraToViewportRay(evt.x / float(width), evt.y / float(height));
+		raySceneQuery->setRay(mouseRay);
+		raySceneQuery->setSortByDistance(true);
+		Ogre::RaySceneQueryResult rsqr = raySceneQuery->execute();
+		if (rsqr.size() > 0) {
+			Ogre::RaySceneQueryResult::iterator itr;
+			// Get results
+			for (itr = rsqr.begin(); itr != rsqr.end(); itr++) {
+				if (itr->movable) {
+					Ogre::Entity *pointedEntity = sceneManager->getEntity(itr->movable->getName());
+					if (pointedEntity) {
+						std::string nodeName = pointedEntity->getParentSceneNode()->getName();
+						if (nodeName.substr(0, 3) == "_S_") {
+							pointedEntity->setMaterialName("Blau");
+						}
+						else if (nodeName.substr(0, 3) == "_P_") {
+							pointedEntity->setMaterialName("Gelb");
+						}
+					}
+					break;
+				}
+			}
+		} // ~selection code
+
 		return true;
 	}
 };
@@ -264,36 +236,15 @@ public:
 	bool frameStarted(const Ogre::FrameEvent &evt)
 	{
 		dancersAngleIncrement+=.01f;
-		rookNode->setPosition(
+		kingNode->setPosition(
 			-1 + std::cos(dancersAngleIncrement) * RADIUS, 
-			rookNode->getPosition()[1], 
-			10 + std::sin(dancersAngleIncrement) * RADIUS);
+			kingNode->getPosition()[1], 
+			-8 + std::sin(dancersAngleIncrement) * RADIUS);
 
-		rookNodeTwo->setPosition(
+		queenNodeTwo->setPosition(
 		1 - std::cos(dancersAngleIncrement) * RADIUS, 
-		rookNodeTwo->getPosition()[1], 
-		10 - std::sin(dancersAngleIncrement) * RADIUS);
-
-		// refresh cam
-		// std::cout << "zoom:" << zoom << std::endl;
-		//camNode->setPosition(camNode->getPosition()[0], camNode->getPosition()[1], camNode->getPosition()[2] + zoom);
-		/*zoom = 0;*/
-
-		//if (yaw > 0.1f || yaw < -0.1f)
-		//	camNode->yaw(Ogre::Degree(yaw));
-		//
-		//if (pitch > 0.1f || pitch < -0.1f)
-		//	camNode->pitch(Ogre::Degree(pitch));
-
-
-		//Ogre::Vector3 cp = camNode->getPosition();
-		//Ogre::Vector3 lap = Ogre::Vector3(X_CENTER, cp[1], Y_CENTER);
-		//Ogre::Vector3 dir = lap - cp;
-
-		//camNode->setDirection(dir);
-		//camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-		//camNode->setPosition(X_CENTER + std::cos(xRotation) * zoom, cp[1], Y_CENTER + std::sin(xRotation) * zoom);
-		//zoom = 0;
+		queenNodeTwo->getPosition()[1], 
+		-8 - std::sin(dancersAngleIncrement) * RADIUS);
 
 		return true;
 	}
@@ -313,16 +264,16 @@ int main()
 	//Ogre::LogManager *logManager = new Ogre::LogManager();
 	//logManager->createLog("ogre.log", true, false, false);
 
-	OgreBites::ApplicationContext ctx("Ogre-Bullet");
+	OgreBites::ApplicationContext ctx("Ogre-Rook");
 	ctx.initApp();
 
 	ctx.getRenderWindow()->setVSyncEnabled(true);
 
-	Ogre::Root *root = ctx.getRoot();
-	Ogre::SceneManager *sceneManager = root->createSceneManager();
-
-	RookFrameListener *physFrameListener = new RookFrameListener(*sceneManager, ctx.getRenderWindow()->getWidth(), ctx.getRenderWindow()->getHeight());
-	root->addFrameListener(physFrameListener);
+	root = ctx.getRoot();
+	sceneManager = root->createSceneManager();
+	
+	RookFrameListener *rookFrameListener = new RookFrameListener(*sceneManager, ctx.getRenderWindow()->getWidth(), ctx.getRenderWindow()->getHeight());
+	root->addFrameListener(rookFrameListener);
 
 	// Shader init
 	Ogre::RTShader::ShaderGenerator *shadergen = Ogre::RTShader::ShaderGenerator::getSingletonPtr();
@@ -337,23 +288,19 @@ int main()
 
 	// create the camera
 	camNode = sceneManager->getRootSceneNode()->createChildSceneNode();
-	Ogre::Camera *cam = sceneManager->createCamera("myCam");
+	cam = sceneManager->createCamera("myCam");
 	cam->setNearClipDistance(Ogre::Real(0.1));
 	cam->setFarClipDistance(FAR_CLIP);
 	cam->setAutoAspectRatio(true);
 	camNode->attachObject(cam);
-	
-	//Ogre::Vector3 cp = camNode->getPosition();
-	//Ogre::Vector3 lap = Ogre::Vector3(0, 0, 0);
-	//Ogre::Vector3 dir = lap - cp;
 	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-	camNode->setPosition(0, 6, 26);
-
-	// camNode->setPosition(36, 6, -14);
+	camNode->setPosition(CAM_POSITION);
 	camNode->lookAt(LOOK_AT_POINT, Ogre::Node::TS_WORLD);
-	// adaptCamera();
 	ctx.getRenderWindow()->addViewport(cam);
-	// std::cout << " W= " << ctx.getRenderWindow()->getWidth() << std::endl;
+
+	// Ray Query
+	raySceneQuery = sceneManager->createRayQuery(Ogre::Ray());
+
 
 
 	// create a plane
@@ -375,45 +322,44 @@ int main()
 	Ogre::MaterialPtr darkMonochromeOrderedDitherMaterial = Ogre::MaterialManager::getSingleton().getByName("DarkMonochromeOrderedFragment");
 	Ogre::MaterialPtr blackMonochromeOrderedDitherMaterial = Ogre::MaterialManager::getSingleton().getByName("BlackMonochromeOrderedFragment");
 
-	rookEntity = sceneManager->createEntity("king.mesh");
-	rookEntity->setMaterial(darkMonochromeOrderedDitherMaterial);
-	rookNode = sceneManager->getRootSceneNode()->createChildSceneNode("DitheredKing");
-	rookNode->setPosition(-1, 0, 10);
-	rookNode->attachObject(rookEntity);
+	kingEntity = sceneManager->createEntity("king.mesh");
+	kingEntity->setMaterial(darkMonochromeOrderedDitherMaterial);
+	kingNode = sceneManager->getRootSceneNode()->createChildSceneNode("DitheredKing");
+	kingNode->setPosition(-1, 0, 10);
+	kingNode->attachObject(kingEntity);
 
-	rookEntityTwo = sceneManager->createEntity("queen.mesh");
-	rookEntityTwo->setMaterial(monochromeOrderedDitherMaterial);
-	rookNodeTwo = sceneManager->getRootSceneNode()->createChildSceneNode("DitheredQueen");
-	rookNodeTwo->setPosition(1, 0, 10);
-	rookNodeTwo->attachObject(rookEntityTwo);
+	queenEntityTwo = sceneManager->createEntity("queen.mesh");
+	queenEntityTwo->setMaterial(monochromeOrderedDitherMaterial);
+	queenNodeTwo = sceneManager->getRootSceneNode()->createChildSceneNode("DitheredQueen");
+	queenNodeTwo->setPosition(1, 0, 10);
+	queenNodeTwo->attachObject(queenEntityTwo);
 
 	
 	Ogre::MaterialPtr gelbMaterial = Ogre::MaterialManager::getSingleton().getByName("Gelb");
 	Ogre::MaterialPtr blauMaterial = Ogre::MaterialManager::getSingleton().getByName("Blau");
 
-	Ogre::Entity *pawn = sceneManager->createEntity("pawn.mesh");
-	pawn->setMaterial(gelbMaterial);
-	Ogre::SceneNode *pawnNode = sceneManager->getRootSceneNode()->createChildSceneNode("pawn");
-	pawnNode->setPosition(X_CENTER, 0, Y_CENTER);
-	pawnNode->attachObject(pawn);
 
     createBoard(sceneManager, monochromeOrderedDitherMaterial, blackMonochromeOrderedDitherMaterial);
 	setPieceOnBoard(WHITE_ROOK, 0, 0, sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
 	setPieceOnBoard(BLACK_KNIGHT, 1, 0, sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
 	setPieceOnBoard(BLACK_BISHOP, 2, 0, sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
 
+
     // sky
 	sceneManager->setSkyBox(true, "TrippySkyBox", 100, false);
 
 	// keys
-	KeyHandler keyHandler(ctx.getRenderWindow()->getWidth(), ctx.getRenderWindow()->getHeight());
+	KeyHandler keyHandler(*sceneManager, *raySceneQuery, ctx.getRenderWindow()->getWidth(), ctx.getRenderWindow()->getHeight());
 	ctx.addInputListener(&keyHandler);
 
 	// Ogre loop
 	ctx.getRoot()->startRendering();
 
 	// free Ogre objects
-	delete physFrameListener;
+	delete rookFrameListener;
+	sceneManager->destroyQuery(raySceneQuery);
+	root->destroySceneManager(sceneManager);
+	
 	//delete logManager;
 	return 0;
 }
@@ -426,7 +372,7 @@ void createBoard(Ogre::SceneManager *sceneManager, Ogre::MaterialPtr &whiteMater
     {
         for (int x = 0; x < 8; x++)
         {
-            std::string nodeName = std::string(1, 'a' + x).append(std::to_string(y + 1));
+            std::string nodeName =  std::string("_S_").append(std::string(1, 'a' + x).append(std::to_string(y + 1)));
             Ogre::Entity *square = sceneManager->createEntity("cube.mesh");
 
             if (!black)
@@ -489,11 +435,13 @@ void setPieceOnBoard(PIECE_ENUM piece, int x, int y, Ogre::SceneManager *sceneMa
 			break;
 		}
 		entity->setMaterial(piece < 6 ? whiteMaterialPtr : blackMaterialPtr);
-		sceneNode = sceneManager->getRootSceneNode()->createChildSceneNode(std::to_string(piece));
+		sceneNode = sceneManager->getRootSceneNode()->createChildSceneNode(std::string("_P_") + std::to_string(piece));
 		sceneNode->setPosition(-2, 0, 0);
 		sceneNode->attachObject(entity);
+		
 		Piece p = { piece, entity, sceneNode };
 		piecesMap.insert(std::pair<PIECE_ENUM, Piece>(piece, p));
 	}
 	sceneNode->setPosition(X_START + x * SQUARE_WIDTH * 2, 0 + BOARD_THICKNESS, Y_START - y * SQUARE_HEIGHT * 2);
 }
+

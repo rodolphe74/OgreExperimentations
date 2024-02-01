@@ -13,8 +13,6 @@ constexpr float SQUARE_WIDTH = 2.0f;
 constexpr float SQUARE_HEIGHT = 2.0f;
 constexpr int X_START = -14;
 constexpr int Y_START = 0;
-// constexpr int X_CENTER = (X_START + 2.0f * 8) / 2.0f;
-// constexpr int Y_CENTER = (Y_START - 2.0f * 8) / 2.0f;
 constexpr float X_CENTER = 0.0f;
 constexpr float Y_CENTER = -14.0f;
 
@@ -24,26 +22,32 @@ int waitedFrames = 0;
 float dancersAngleIncrement = 0.0f;
 
 const float ZOOM_INCREMENT = 1.0f;
-const float ZOOM_MAX = 35.0f;
-const float ZOOM_MIN = 20.0f;
+const float ZOOM_MAX = 15.0f;
+const float ZOOM_MIN = -5.0f;
 const float CAM_HEIGHT = 6.0f;
 const float Y_ROTATION_MAX = 1.72f;
 const float Y_ROTATION_MIN = 0.04f;
-float CAM_X_RADIUS = 35.0f;
-float CAM_Y_RADIUS = 35.0f;
-// float xRotation = 0.0f;
-// float yRotation = M_PI/2;
+float xRotation = 0.0f;
+float yRotation = 0.0f;
+float zTranslate = 0.0f;
 float X_ROTATION_INCREMENT = .05f;
 float Y_ROTATION_INCREMENT = .05f;
 
+//uint32_t width = 0;
+//uint32_t height = 0;
+
 Ogre::Vector3 LOOK_AT_POINT = Ogre::Vector3(X_CENTER, CAM_HEIGHT, Y_CENTER);
+Ogre::Vector3 CAM_POSITION = Ogre::Vector3(0, 6, 26);
 
-Ogre::Entity *rookEntity;
-Ogre::Entity *rookEntityTwo;
-Ogre::SceneNode *rookNode;
-Ogre::SceneNode *rookNodeTwo;
+Ogre::Root *root;
+Ogre::SceneManager *sceneManager;
+Ogre::RaySceneQuery *raySceneQuery;
+Ogre::Entity *kingEntity;
+Ogre::Entity *queenEntityTwo;
+Ogre::SceneNode *kingNode;
+Ogre::SceneNode *queenNodeTwo;
 Ogre::SceneNode *camNode;
-
+Ogre::Camera *cam;
 
 enum PIECE_ENUM { 
 	WHITE_PAWN = 0, WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING,
@@ -58,5 +62,7 @@ struct PieceStruct {
 typedef PieceStruct Piece;
 
 std::map<PIECE_ENUM, Piece> piecesMap;
+Ogre::Vector3 ArbitraryRotate(Ogre::Vector3 p, Ogre::Real theta, Ogre::Vector3 p1, Ogre::Vector3 p2);
 void createBoard(Ogre::SceneManager *sceneManager, Ogre::MaterialPtr &whiteMaterialPtr, Ogre::MaterialPtr &blackMaterialPtr);
 void setPieceOnBoard(PIECE_ENUM piece, int x, int y, Ogre::SceneManager *sceneManager, Ogre::MaterialPtr &whiteMaterialPtr, Ogre::MaterialPtr &blackMaterialPtr);
+void rotateAroundLookAtPointThenTranslateZ();
