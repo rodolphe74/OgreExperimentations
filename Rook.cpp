@@ -14,7 +14,7 @@
 
 
 
-Ogre::Vector3 ArbitraryRotate(Ogre::Vector3 p, Ogre::Real theta, Ogre::Vector3 p1, Ogre::Vector3 p2)
+Ogre::Vector3 arbitraryRotate(Ogre::Vector3 p, Ogre::Real theta, Ogre::Vector3 p1, Ogre::Vector3 p2)
 {
 	// Rotate a point p by angle theta around an arbitrary line segment p1-p2
 	// Return the rotated point.
@@ -62,11 +62,11 @@ void rotateAroundLookAtPointThenTranslateZ()
 	Ogre::Vector3 camPosition = CAM_POSITION - LOOK_AT_POINT;
 
 	// Rotate X
-	camPosition = ArbitraryRotate(camPosition, Ogre::Real(xRotation), Ogre::Vector3(0, 0, 0), Ogre::Vector3::UNIT_Y);
+	camPosition = arbitraryRotate(camPosition, Ogre::Real(xRotation), Ogre::Vector3(0, 0, 0), Ogre::Vector3::UNIT_Y);
 
 	// Rotate Y in new frame
-	Ogre::Vector3 frameX = ArbitraryRotate(Ogre::Vector3::UNIT_X, Ogre::Real(xRotation), Ogre::Vector3(0, 0, 0), Ogre::Vector3::UNIT_Y);
-	camPosition = ArbitraryRotate(camPosition, Ogre::Real(yRotation), Ogre::Vector3(0, 0, 0), frameX);
+	Ogre::Vector3 frameX = arbitraryRotate(Ogre::Vector3::UNIT_X, Ogre::Real(xRotation), Ogre::Vector3(0, 0, 0), Ogre::Vector3::UNIT_Y);
+	camPosition = arbitraryRotate(camPosition, Ogre::Real(yRotation), Ogre::Vector3(0, 0, 0), frameX);
 
 	camNode->setPosition(camPosition + LOOK_AT_POINT);
 	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
@@ -186,7 +186,6 @@ class KeyHandler : public OgreBites::InputListener
 		default:
 			break;
 		}
-
 		
 		return true;
 	}
@@ -207,8 +206,6 @@ class KeyHandler : public OgreBites::InputListener
 
 			Piece piece = selectPiece(evt.x, evt.y);
 			if (piece.piece != UNKNOWN && piece.piece != EMPTY_SQUARE) {
-				// selected piece
-				// piece.entity->setMaterialName("Gelb");
 				selectedPiece = piece;
 			} else {
 				selectedPiece = { UNKNOWN, nullptr, nullptr };
@@ -226,8 +223,9 @@ class KeyHandler : public OgreBites::InputListener
 			leftMouseButtonPressed = 0;
 
 			if (selectedPiece.piece != UNKNOWN) {
+				// mouse released with piece selection
 				Piece arrival = selectSquare(evt.x, evt.y);
-				std::cout << "vous avez laché la piece " << selectedPiece.piece << " sur " << arrival.x << "," << arrival.y << std::endl;
+				selectedPiece.node->setPosition(X_START + arrival.x * SQUARE_WIDTH * 2, 0 + BOARD_THICKNESS, Y_START - arrival.y * SQUARE_HEIGHT * 2);
 			}
 
 			selectedPiece = { UNKNOWN, nullptr, nullptr };
@@ -239,7 +237,7 @@ class KeyHandler : public OgreBites::InputListener
 		if (leftMouseButtonPressed) {
 
 			if (selectedPiece.piece != UNKNOWN) {
-				std::cout << "vous bougez la selection " << selectedPiece.piece << " depuis " << selectedPiece.x << "," << selectedPiece.y << std::endl;
+				// grabbing case
 				Ogre::Ray mouseRay = cam->getCameraToViewportRay(evt.x / float(width), evt.y / float(height));
         		Ogre::RayTestResult rtr = mouseRay.intersects(plane);
 				std::cout << rtr.first << "=" << rtr.second << std::endl;
@@ -249,6 +247,7 @@ class KeyHandler : public OgreBites::InputListener
 				return true;
 			}
 
+			// board rotation cases
 			if (evt.x > pressX) {
 				xRotation -= X_ROTATION_INCREMENT;
 				rotateAroundLookAtPointThenTranslateZ();
@@ -364,8 +363,6 @@ int main()
 	// Ray Query
 	raySceneQuery = sceneManager->createRayQuery(Ogre::Ray());
 
-
-
 	// create a plane
 	Ogre::MeshPtr planePtr = Ogre::MeshManager::getSingleton().createPlane("ground",
 		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, plane,
@@ -395,17 +392,14 @@ int main()
 	queenNodeTwo = sceneManager->getRootSceneNode()->createChildSceneNode("DitheredQueen");
 	queenNodeTwo->setPosition(1, 0, 10);
 	queenNodeTwo->attachObject(queenEntityTwo);
-
 	
 	Ogre::MaterialPtr gelbMaterial = Ogre::MaterialManager::getSingleton().getByName("Gelb");
 	Ogre::MaterialPtr blauMaterial = Ogre::MaterialManager::getSingleton().getByName("Blau");
-
 
     createBoard(sceneManager, monochromeOrderedDitherMaterial, blackMonochromeOrderedDitherMaterial);
 	setPieceOnBoard(WHITE_ROOK, 0, 0, sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
 	setPieceOnBoard(BLACK_KNIGHT, 1, 0, sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
 	setPieceOnBoard(BLACK_BISHOP, 2, 0, sceneManager, monochromeOrderedDitherMaterial, darkMonochromeOrderedDitherMaterial);
-
 
     // sky
 	sceneManager->setSkyBox(true, "TrippySkyBox", 100, false);

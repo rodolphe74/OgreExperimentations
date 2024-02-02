@@ -65,7 +65,7 @@ struct PieceStruct {
 typedef PieceStruct Piece;
 
 std::map<PIECE_ENUM, Piece> piecesMap;
-Ogre::Vector3 ArbitraryRotate(Ogre::Vector3 p, Ogre::Real theta, Ogre::Vector3 p1, Ogre::Vector3 p2);
+Ogre::Vector3 arbitraryRotate(Ogre::Vector3 p, Ogre::Real theta, Ogre::Vector3 p1, Ogre::Vector3 p2);
 void createBoard(Ogre::SceneManager *sceneManager, Ogre::MaterialPtr &whiteMaterialPtr, Ogre::MaterialPtr &blackMaterialPtr);
 void setPieceOnBoard(PIECE_ENUM piece, int x, int y, Ogre::SceneManager *sceneManager, Ogre::MaterialPtr &whiteMaterialPtr, Ogre::MaterialPtr &blackMaterialPtr);
 void rotateAroundLookAtPointThenTranslateZ();
