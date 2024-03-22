@@ -1,8 +1,12 @@
-uniform vec3 LightPosition;
-uniform vec3 EyePosition;
-uniform mat4 worldViewProj;	//= gl_ModelViewProjectionMatrix ?
+#version 150 core
 
-void main() // all vertex shaders define a main() function
+uniform vec3 lightPosition;
+uniform vec3 eyePosition;
+uniform mat4 worldViewProj;
+
+attribute vec4 vertex;
+
+void main()
 {
-	gl_Position = worldViewProj * gl_Vertex;
+	gl_Position = worldViewProj * vertex;
 }

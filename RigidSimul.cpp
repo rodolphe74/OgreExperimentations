@@ -20,13 +20,13 @@
 constexpr int OBJECT_LIFE_TIME = 300;
 constexpr int WAIT_FRAMES = 0;
 constexpr float CAM_Y = 10.0f;
-constexpr float CAM_Z = 30.0f;
+constexpr float RADIUS = 30.0f;
 constexpr float FAR_CLIP = 500.0f;
 constexpr int REFRESH_RATE = 75.0f;
 
 int tick = 0;
 int waitedFrames = 0;
-float cameraIncrement = 0;
+float dancersAngleIncrement = 0;
 
 
 struct BodyParameters {
@@ -163,7 +163,7 @@ void addRandomCubeToTheScene(Physics &physics, Ogre::SceneManager& sceneManager,
 		int s = std::rand() % 50 + 21;
 		float sf = s / 100.0f;
 
-		Ogre::Entity* cubeEntity = sceneManager.createEntity("Cube.mesh");
+		Ogre::Entity* cubeEntity = sceneManager.createEntity("cube.mesh");
 		std::string nodeName = "cubeNode" + std::to_string(currentTick);
 		Ogre::SceneNode* cubeNode = sceneManager.getRootSceneNode()->createChildSceneNode(nodeName);
 		cubeNode->setPosition(Ogre::Real(x), 15, 0);
@@ -233,14 +233,14 @@ public:
 			}
 		}
 
-		cameraIncrement+=.005f;
+		dancersAngleIncrement+=.005f;
 		Ogre::Vector3 cp = physics->camera->getPosition();
 		Ogre::Vector3 lap = Ogre::Vector3(0, 0, 0);
 		Ogre::Vector3 dir = lap - cp;
 		
 		physics->camera->setDirection(dir);
 		physics->camera->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-		physics->camera->setPosition(std::cos(cameraIncrement) * CAM_Z, cp[1], std::sin(cameraIncrement) * CAM_Z);
+		physics->camera->setPosition(std::cos(dancersAngleIncrement) * RADIUS, cp[1], std::sin(dancersAngleIncrement) * RADIUS);
 		return true;
 	}
 
@@ -296,7 +296,7 @@ int main()
 	Ogre::Vector3 lap = Ogre::Vector3(0, 0, 0);
 	Ogre::Vector3 dir = lap - cp;
 	camNode->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-	camNode->setPosition(std::cos(cameraIncrement) * CAM_Z, CAM_Y, std::sin(cameraIncrement) * CAM_Z);
+	camNode->setPosition(std::cos(dancersAngleIncrement) * RADIUS, CAM_Y, std::sin(dancersAngleIncrement) * RADIUS);
 	physics.camera = camNode;
 
 	// and tell it to render into the main window

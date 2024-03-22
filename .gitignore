@@ -33,6 +33,7 @@
 
 # Visual studio file
 .vs
+.vscode
 CMakeFiles
 Debug
 Release
