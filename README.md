@@ -1,5 +1,5 @@
 # OgreExperimentations
-3D &amp; physic engine association.
+[3D](https://www.ogre3d.org) &amp; [physic engine](https://github.com/bulletphysics/bullet3) association.
 
 <img src="video/Ogre-Rook.gif" alt="Dancing" width=640 />
 
