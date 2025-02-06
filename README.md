@@ -22,10 +22,10 @@ cd OgreExperimentations
 git submodule update
 git submodule init
 sln.ps1
-cmake . -DCMAKE_TOOLCHAIN_FILE=...\vcpkg\scripts\buildsystems\vcpkg.cmake
+cmake . -DCMAKE_TOOLCHAIN_FILE=[...]\vcpkg\scripts\buildsystems\vcpkg.cmake
 ```
 
-In Debug folder, in plugins.cfg file, adapt line begining with PluginFolder to ```...\vcpkg\packages\ogre_x64-windows\debug\plugins\ogre``` folder.
+In Debug folder, in plugins.cfg file, adapt line begining with PluginFolder to ```[...]\vcpkg\packages\ogre_x64-windows\debug\plugins\ogre``` folder.
 The same for Release folder
 
 In Debug folder, in resources.cfg, adapt each path to vcpkg ogre folder.
