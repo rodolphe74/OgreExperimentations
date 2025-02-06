@@ -1,6 +1,6 @@
 # https://github.com/microsoft/vcpkg
 
-cmake . -DCMAKE_TOOLCHAIN_FILE=C:\Users\rodoc\HOME\vcpkg\scripts\buildsystems\vcpkg.cmake
+# cmake . -DCMAKE_TOOLCHAIN_FILE=C:\Users\rodoc\HOME\vcpkg\scripts\buildsystems\vcpkg.cmake
 mkdir -Force Debug
 mkdir -Force Release
 
