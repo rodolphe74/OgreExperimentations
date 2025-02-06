@@ -6,7 +6,7 @@
 <img src="video/Ogre-Bullet.gif" alt="Gravity with Bullet" width=640 />
 
 # Compilation
-with [Visual Studio](https://visualstudio.microsoft.com/fr/) and [vcpkg](https://vcpkg.io/en/).
+Using [Visual Studio](https://visualstudio.microsoft.com/fr/) and [vcpkg](https://vcpkg.io/en/).
 
 After Visual Studio installation, open a Developper PowerShell terminal.
 
