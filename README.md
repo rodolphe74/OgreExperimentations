@@ -16,7 +16,6 @@ cd vcpkg
 vcpkg install ogre
 vcpkg install bullet3
 ```
-
 ```
 git clone https://github.com/rodolphe74/OgreExperimentations.git
 cd OgreExperimentations
