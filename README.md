@@ -7,7 +7,8 @@
 
 # Compilation
 with [Visual Studio](https://visualstudio.microsoft.com/fr/) and [vcpkg](https://vcpkg.io/en/).
-Open Developper PowerShell terminal.
+
+After Visual Studio installation, open a Developper PowerShell terminal.
 
 ```
 git clone https://github.com/microsoft/vcpkg.git
